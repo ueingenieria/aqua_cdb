@@ -1,0 +1,65 @@
+{
+  "_args": [
+    [
+      "cordova-plugin-keyboard@1.2.0",
+      "/Users/matiasmarquez/Documents/APP_AquaExpress"
+    ]
+  ],
+  "_development": true,
+  "_from": "cordova-plugin-keyboard@1.2.0",
+  "_id": "cordova-plugin-keyboard@1.2.0",
+  "_inBundle": false,
+  "_integrity": "sha512-Zng4SgDQQ2BCqeDOvrsgNlM9tcjnxmJoh0Qhex0KltMsoR0g/ONbMTpaVvI8EhNKVO8HJPnhFxxzHxrCPLQ7sQ==",
+  "_location": "/cordova-plugin-keyboard",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "cordova-plugin-keyboard@1.2.0",
+    "name": "cordova-plugin-keyboard",
+    "escapedName": "cordova-plugin-keyboard",
+    "rawSpec": "1.2.0",
+    "saveSpec": null,
+    "fetchSpec": "1.2.0"
+  },
+  "_requiredBy": [
+    "#DEV:/"
+  ],
+  "_resolved": "https://registry.npmjs.org/cordova-plugin-keyboard/-/cordova-plugin-keyboard-1.2.0.tgz",
+  "_spec": "1.2.0",
+  "_where": "/Users/matiasmarquez/Documents/APP_AquaExpress",
+  "author": {
+    "name": "Apache Software Foundation"
+  },
+  "bugs": {
+    "url": "https://github.com/cjpearson/cordova-plugin-keyboard/issues"
+  },
+  "cordova": {
+    "id": "cordova-plugin-keyboard",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "description": "Cordova Keyboard Plugin",
+  "engines": [
+    {
+      "name": "cordova",
+      "version": ">=3.2.0"
+    }
+  ],
+  "homepage": "https://github.com/cjpearson/cordova-plugin-keyboard#readme",
+  "keywords": [
+    "cordova",
+    "keyboard",
+    "ecosystem:cordova",
+    "cordova-ios",
+    "cordova-android"
+  ],
+  "license": "Apache 2.0",
+  "name": "cordova-plugin-keyboard",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cjpearson/cordova-plugin-keyboard.git"
+  },
+  "version": "1.2.0"
+}

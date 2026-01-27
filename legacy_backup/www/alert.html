@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html id="win">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' gap:; style-src 'self' 'unsafe-inline'; media-src *" />
+    <!-- Good default declaration:
+    * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+    * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+    * Disables use of eval() and inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+        * Enable inline JS: add 'unsafe-inline' to default-src
+        * Enable eval(): add 'unsafe-eval' to default-src
+    * Create your own at http://cspisawesome.com
+    -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <title>Alerta</title>
+</head>
+
+<body style="display: block !important;" class="reveal_animation">
+
+
+
+    <div id="fullscreen" class="cotenedor" style="height: 100%;">
+
+        <div id="pantalla_resultado">
+
+            <h1 id="titulo_resultado">Pago Exitoso</h1>
+
+            <h3 id="subtitulo_resultado">Pago exitoso. Seguí las instrucciones para iniciar el lavado.</h3>
+
+            <svg id="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+            </svg>
+            <button type="button" onclick="location.replace('loged.html')" id="bot_ir_home">Ir a Home</button>
+
+        </div>
+
+    </div>
+</body>
+
+<!-- <script type="text/javascript" src="cordova.js"></script> -->
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<link rel="stylesheet" href="res/lbr/alerts/sweetalert2/dark.css">
+<script type="text/javascript" src="res/lbr/alerts/sweetalert2/sweetalert2.min.js"></script>
+<script type="text/javascript">
+    $("html").height($(document).height());
+
+    function findGetParameter(parameterName) {
+        var result = null,
+            tmp = [];
+        var items = location.search.substr(1).split("&");
+        for (var index = 0; index < items.length; index++) {
+            tmp = items[index].split("=");
+            if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+        }
+        return result;
+    }
+    let type = findGetParameter('type')
+    let icon = document.getElementById('icon')
+    switch (type) {
+        case 'success':
+            icon.innerHTML = '<path fill="#dbdbdb" d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z" />'
+            break
+
+        case 'error':
+            icon.innerHTML = '<path fill="#dbdbdb" d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"/>'
+            break
+
+        case 'warning':
+            icon.innerHTML = '<path fill="#343a40" d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480H40c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24V296c0 13.3 10.7 24 24 24s24-10.7 24-24V184c0-13.3-10.7-24-24-24zm32 224c0-17.7-14.3-32-32-32s-32 14.3-32 32s14.3 32 32 32s32-14.3 32-32z"/>'
+            break
+
+        default:
+            break
+    }
+    document.getElementById('fullscreen').classList.add(type)
+    document.getElementById('subtitulo_resultado').innerHTML = findGetParameter('subtitulo');
+    document.getElementById('titulo_resultado').innerHTML = findGetParameter('titulo');
+</script>
+
+</html>

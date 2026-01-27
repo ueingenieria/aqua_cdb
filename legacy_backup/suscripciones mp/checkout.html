@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="uE, MatiMrqz">
+    <meta name="generator" content="Hugo 0.98.0">
+    <title>Suscripción a Club de Beneficios - AquaExpress</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css">
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+        
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+        
+        .b-example-divider {
+            height: 3rem;
+            background-color: rgba(0, 0, 0, .1);
+            border: solid rgba(0, 0, 0, .15);
+            border-width: 1px 0;
+            box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+        }
+        
+        .b-example-vr {
+            flex-shrink: 0;
+            width: 1.5rem;
+            height: 100vh;
+        }
+        
+        .bi {
+            vertical-align: -.125em;
+            fill: currentColor;
+        }
+        
+        .nav-scroller {
+            position: relative;
+            z-index: 2;
+            height: 2.75rem;
+            overflow-y: hidden;
+        }
+        
+        .nav-scroller .nav {
+            display: flex;
+            flex-wrap: nowrap;
+            padding-bottom: 1rem;
+            margin-top: -1px;
+            overflow-x: auto;
+            text-align: center;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <div class="container">
+        <main>
+            <div class="pt-5 text-center">
+                <img class="d-block mx-auto mb-4" src="https://www.aquaexpress.com.ar/wp-content/uploads/2019/01/AquaExpress.png" alt="AquaExpress" width="300">
+                <h2 class="display-6" id="plan_title">Cargando...</h2>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-5">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <p class="text-muted"><em>Detalle de Suscripción</em></p>
+                            <div id="loader" class="d-flex justify-content-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            <p class="card-text" style="font-size: 2em;">Pagarás <strong id="plan_price">$-</strong> por <strong id="plan_frequency">-</strong></p>
+                            <h5 class="py-1"><span class="d-none mx-1 badge rounded-pill bg-success" id="plan_free">30 días gratis</span><span id="plan_recurrency" class="mx-1 badge rounded-pill bg-primary">-</span></h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="py-1 text-center">
+                <p class="lead">Para iniciar tu suscripción necesitamos que completes los siguientes datos: </p>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-10 col-lg-10">
+                    <h4 class="mb-3">Datos de usuario</h4>
+                    <form class="needs-validation" novalidate id="form-checkout">
+                        <fieldset id="form_fieldset">
+
+
+                            <div class="row g-3">
+
+                                <div class="col-12">
+                                    <label for="email" class="form-label">E-Mail <span class="text-muted">(Asociado a tu cuenta AquaExpress)</span></label>
+                                    <input type="email" class="form-control" id="email_aqua" placeholder="you@example.com" readonly>
+                                    <div class="invalid-feedback">
+                                        Por favor ingresa un mail válido
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="email" class="form-label">E-Mail de facturación</label>
+                                    <input type="email" class="form-control" id="email" placeholder="mail@ejemplo.com">
+                                    <div class="invalid-feedback">
+                                        Por favor ingresa un mail válido
+                                    </div>
+                                </div>
+
+                                <div class="col-9 col-md-5">
+                                    <label for="zip" class="form-label">Documento</label>
+                                    <input type="text" class="form-control" id="user-id" placeholder="" inputmode="numeric" pattern="[0-9]{7,8}" required>
+                                    <div class="invalid-feedback">
+                                        Numero de documento requerido.
+                                    </div>
+                                </div>
+                                <div class="col-3 col-md-3">
+                                    <label for="state" class="form-label">Tipo</label>
+                                    <select class="form-select" id="id-type" required>
+                                    <option value="">Seleccionar</option>
+                                </select>
+                                    <div class="invalid-feedback">
+                                        Seleccione un tipo de documento
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <h4 class="mb-3">Datos de pago</h4>
+
+                            <div class="row gy-3">
+                                <div class="col-md-9">
+                                    <label for="cc-number" class="form-label">Número de tarjeta</label>
+                                    <input type="text" class="form-control" id="cc-number" placeholder="" inputmode="numeric" required>
+                                    <div class="invalid-feedback">
+                                        Numero de tarjeta requerido
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="state" class="form-label">Banco Emisor</label>
+                                    <select class="form-select" id="cc-issuer" disabled>
+                                </select>
+                                    <div class="invalid-feedback">
+                                        Debe seleccionar uno
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="cc-name" class="form-label">Titular de la tarjeta</label>
+                                    <input type="text" class="form-control" id="cc-name" placeholder="" required>
+                                    <div class="invalid-feedback">
+                                        Nombre de titular (como figura en la tarjeta)
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label for="cc-expiration" class="form-label">Fecha de expiración</label>
+                                    <input type="text" class="form-control" id="cc-expiration" placeholder="" inputmode="numeric" pattern="[0-1]?[0-9]\/20[0-9][0-9]" required>
+                                    <div class="invalid-feedback">
+                                        Fecha de expiración requerida
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label for="cc-cvv" class="form-label">CVV</label>
+                                    <input type="text" class="form-control" id="cc-cvv" placeholder="" inputmode="numeric" pattern="[0-9]{3,4}" required>
+                                    <div class="invalid-feedback">
+                                        Código de seguridad requerido
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <label for="state" class="form-label">Cuotas</label>
+                                <select class="form-select" id="cc-installments" required>
+                                <option value="">Seleccionar</option>
+                            </select>
+                                <div class="invalid-feedback">
+                                    Debe seleccionar una opcion
+                                </div>
+                            </div>
+                            <hr class="my-4">
+
+                            <button class="w-100 btn btn-primary btn-lg" type="submit"></span>
+                                Iniciar suscripción <span id="submiting" class="d-none spinner-border spinner-border-sm" role="status" aria-hidden="true"></span></button>
+                        </fieldset>
+                        <div class="my-3" id="alertPlaceholder"></div>
+                    </form>
+                    <br>
+                    <p><small>1-Para verificar que los datos son correctos se cobrará un cargo provisorio que luego será devuelto.</small><br>
+                        <small>2-Podés ver nuestros <a href="https://www.aquaexpress.com.ar/terminos_y_condiciones/">Términos y Condiciones.</a></small><br>
+                        <small>3-Utilizamos MercadoPago para validar los datos de tu tarjeta. AquaExpress no almacena ninguno de estos datos en sus servidores.</a></small></p>
+
+                </div>
+            </div>
+
+        </main>
+        <footer class="text-muted text-center text-small">
+            <p class="mb-1">&copy; 2017–2022 AquaExpress</p>
+            <ul class="list-inline">
+                <li class="list-inline-item"><a href="#">Politicas de privacidad</a></li>
+                <li class="list-inline-item"><a href="https://www.aquaexpress.com.ar/terminos_y_condiciones/">Terminos y condiciones</a></li>
+                <li class="list-inline-item"><a href="mailto:contacto@aquaexpress.com.ar">Soporte</a></li>
+            </ul>
+        </footer>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.min.js" integrity="sha384-kjU+l4N0Yf4ZOJErLsIcvOU2qSb74wXpOhqTvwVx3OElZRweTnQ6d31fXEoRD1Jy" crossorigin="anonymous"></script>
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+    <script>
+        function findGetParameter(parameterName) {
+            var result = null,
+                tmp = [];
+            var items = location.search.substring(1).split("&");
+            for (var index = 0; index < items.length; index++) {
+                tmp = items[index].split("=");
+                if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+            }
+            return result;
+        }
+        var errorCount = 0
+        var planAmount = 0
+        const form = document.getElementById('form-checkout');
+        const alertPlaceholder = document.getElementById('alertPlaceholder');
+        var backUrl = "";
+
+        const alert = (message, type) => {
+            const wrapper = document.createElement('div')
+            wrapper.innerHTML = [
+                `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+                `   <div>${message}</div>`,
+                '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+                '</div>'
+            ].join('')
+
+            alertPlaceholder.append(wrapper)
+        }
+
+        const mp = new MercadoPago('APP_USR-790007d2-8989-4f0c-92ac-a1f63d91db8a', {
+            locale: 'es-AR'
+        }); //Credenciales AE Produccion
+
+        window.addEventListener('load', function() {
+            fetch('https://www.aquaexpress.com.ar/aqua4d/aqua_pagos_mp/get_suscription.php', {
+                    method: 'GET',
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then(res => {
+                    return res.json()
+                })
+                .then(plan => {
+                    planAmount = plan.auto_recurring.transaction_amount;
+                    backUrl = plan.back_url;
+                    document.getElementById('plan_title').innerHTML = plan.reason
+                    document.getElementById('plan_price').innerHTML = '$' + plan.auto_recurring.transaction_amount
+                    document.getElementById('plan_frequency').innerHTML = plan.auto_recurring.frequency_type == "months" ? 'mes' : plan.auto_recurring.frequency_type == "years" ? 'año' : '-';
+                    var freePill = document.getElementById('plan_free')
+
+                    if (plan.auto_recurring.free_trial) {
+                        freePill.classList.remove('d-none')
+                        freePill.innerHTML = plan.auto_recurring.free_trial.first_invoice_offset + ' dias gratis'
+                    }
+                    document.getElementById('plan_recurrency').innerHTML = 'Pagarás cada día ' + plan.auto_recurring.billing_day
+                })
+                .finally(() => {
+                    document.getElementById('loader').classList.add('d-none')
+                    const mail = findGetParameter('email')
+                    document.getElementById('email').value = mail;
+                    document.getElementById('email_aqua').value = mail;
+                    const cardForm = mp.cardForm({
+                        amount: planAmount.toString(),
+                        autoMount: true,
+                        form: {
+                            id: "form-checkout",
+                            cardholderName: {
+                                id: "cc-name",
+                                placeholder: "Titular de la tarjeta",
+                            },
+                            cardholderEmail: {
+                                id: "email",
+                                placeholder: "mail@ejemplo.com",
+                            },
+                            cardNumber: {
+                                id: "cc-number",
+                                placeholder: "Número de la tarjeta",
+                            },
+                            expirationDate: {
+                                id: "cc-expiration",
+                                placeholder: "MM/YYYY",
+                            },
+                            securityCode: {
+                                id: "cc-cvv",
+                                placeholder: "Código de seguridad",
+                            },
+                            installments: {
+                                id: "cc-installments",
+                                placeholder: "Cuotas",
+                            },
+                            identificationType: {
+                                id: "id-type",
+                                placeholder: "Tipo de documento",
+                            },
+                            identificationNumber: {
+                                id: "user-id",
+                                placeholder: "Número de documento",
+                            },
+                            issuer: {
+                                id: "cc-issuer",
+                                placeholder: "-",
+                            },
+                        },
+                        callbacks: {
+                            onFormMounted: error => {
+                                if (error) return console.warn("Form Mounted handling error: ", error);
+                                console.info("Form mounted");
+                            },
+                            onError: error => {
+                                form.classList.add('was-validated');
+                                error.forEach(e => {
+                                    console.log(e)
+                                    alert(e.message, 'danger');
+                                });
+                            },
+                            onFetching: (resource) => {
+                                console.info('Fetching resource: ', resource)
+                            },
+                            onCardTokenReceived: (error, token) => {
+                                if (error) return alert(error, 'danger')
+                                fetch('https://www.aquaexpress.com.ar/aqua4d/aqua_pagos_mp/suscripcion.php', {
+                                        method: 'POST',
+                                        headers: {
+                                            "Content-Type": "application/json"
+                                        },
+                                        body: JSON.stringify({
+                                            email: mail,
+                                            email_mp: document.getElementById('email').value,
+                                            c_token: token.token
+                                        })
+                                    })
+                                    .then(res => {
+                                        if (res.ok) {
+                                            alert('Suscripción Exitosa!', 'success');
+                                            setTimeout(() => {
+                                                location.replace(backUrl)
+                                            }, 500);
+                                        } else {
+                                            if (!errorCount) {
+                                                alert('Ocurrió un error. Revisa los datos e intenta nuevamente.', 'danger')
+                                                errorCount++;
+                                            } else {
+                                                alert('Esta tarjeta esta siendo rechazada. Intenta nuevamente con otra.', 'danger')
+                                            }
+                                        }
+                                    })
+                                    .catch(e => {
+                                        alert(e, 'danger')
+                                    })
+                                    .finally(() => {
+                                        document.getElementById('form_fieldset').removeAttribute('disabled')
+                                        document.getElementById('submiting').classList.add('d-none')
+                                    })
+                            },
+                            onSubmit: (event) => {
+                                event.preventDefault();
+                                document.getElementById('form_fieldset').setAttribute('disabled', 'disabled')
+                                document.getElementById('submiting').classList.remove('d-none')
+                                if (errorCount > 0) cardForm.createCardToken();
+                                return false
+                            }
+                        },
+                    });
+                })
+        })
+    </script>
+</body>
+
+</html>

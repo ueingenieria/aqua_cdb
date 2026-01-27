@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html id="win">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' gap:; style-src 'self' 'unsafe-inline'; media-src *" />
+    <!-- Good default declaration:
+    * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+    * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+    * Disables use of eval() and inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+        * Enable inline JS: add 'unsafe-inline' to default-src
+        * Enable eval(): add 'unsafe-eval' to default-src
+    * Create your own at http://cspisawesome.com
+    -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
+
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <title>Aqua Express</title>
+</head>
+
+<body>
+
+    <div class="cotenedor">
+        <div class="spacer"></div>
+        <div class="encabezado2">
+            <div class="header">
+                <label id="nombre_usr" class="logued_name">Hola!</label>
+                <label class="saldo_pesos" id="label_pesos"></label>
+                <div class="div_puntos">
+                    <label>Puntos acumulados</label>
+                    <label class="saldo_puntos" id="label_puntos">--</label>
+                </div>
+            </div>
+            <div id="banner1" style="display: none;"></div>
+            <!-- <button class="notif" id="notificaciones"></button> -->
+            <button type="button" class="bot_perfil" id="boton_perfil"> </button>
+        </div>
+        <div class="card-container">
+            <!-- <div id="card_lavadero_cercano" style="display: none;">
+                <svg id="locationIcon" xmlns="http://www.w3.org/2000/svg" style="height: 1.5em;margin-top: auto;margin-bottom: auto;padding: 0 1em;filter: drop-shadow(2px 4px 2px rgba(0, 0, 0, 0.2));" viewBox="0 0 448 512"><path fill="#EAE8E8" d="M429.6 92.1c4.9-11.9 2.1-25.6-7-34.7s-22.8-11.9-34.7-7l-352 144c-14.2 5.8-22.2 20.8-19.3 35.8s16.1 25.8 31.4 25.8H224V432c0 15.3 10.8 28.4 25.8 31.4s30-5.1 35.8-19.3l144-352z"/></svg>
+                <div style="width: 50%;">
+                    <p class="titulo">Estás cerca!</p>
+                    <p id="lavaderoTag" class="data">-</p>
+                </div>
+                <div>
+                    <p class="distancia"><strong id="distanciaTag">~0,123Km</strong></p>
+                </div>
+            </div> -->
+            <div class="card" id="A4D">
+                <div class="card-title">
+                    Aqua <strong>4D</strong> Automática
+                </div>
+                <button type="button" class="botones1" id="boton_qr"> </button>
+                <button type="button" class="botones1" id="boton_carga"> </button>
+            </div>
+            <div class="card" id="AL">
+                <div class="card-title">Aqua <strong>Autolavado</strong></div>
+                <button type="button" class="botones1" id="boton_creditos"> </button>
+            </div>
+            <div class="card" id="CDB">
+                <div class="card-title"><strong>Club</strong> de <strong>Beneficios</strong></div>
+                <button type="button" class="botones1" id="boton_cupones"> </button>
+                <button type="button" class="botones1" id="boton_beneficios"> </button>
+            </div>
+            <button type="button" class="botones2_">
+                <div id="card_lavadero_cercano" class="iniciar_navegacion">
+                    <svg id="locationIcon" xmlns="http://www.w3.org/2000/svg" style="height: 1.5em;margin-top: auto;margin-bottom: auto;padding: 0 1em;filter: drop-shadow(2px 4px 2px rgba(0, 0, 0, 0.2));" viewBox="0 0 448 512"><path fill="#EAE8E8" d="M429.6 92.1c4.9-11.9 2.1-25.6-7-34.7s-22.8-11.9-34.7-7l-352 144c-14.2 5.8-22.2 20.8-19.3 35.8s16.1 25.8 31.4 25.8H224V432c0 15.3 10.8 28.4 25.8 31.4s30-5.1 35.8-19.3l144-352z"/></svg>
+                    <div style="width: 50%;">
+                        <p id="lavaderoTitulo" class="titulo">Estás cerca! <span>Abrir en Maps</span></p>
+                        <p id="lavaderoTag" class="data">Iniciar navegación</p>
+                    </div>
+                    <div>
+                        <p class="distancia"><strong id="distanciaTag">~m</strong></p>
+                    </div>
+                </div>
+                <div id="boton_ubicaciones"></div>
+            </button>
+        </div>
+
+    </div>
+
+    </div>
+</body>
+
+<script type="text/javascript" src="cordova.js"></script>
+<script src="js/jquery.min.js"></script>
+<script type="text/javascript">
+    $("html").height($(document).height());
+</script>
+<script type="text/javascript" src="js/fetch_opt.js"></script>
+<script type="text/javascript" src="res/lbr/suncalc/suncalc.js"></script>
+<script type="text/javascript" src="js/logued.js"></script>
+<link rel="stylesheet" href="res/lbr/alerts/sweetalert2/dark.css">
+<script type="text/javascript" src="res/lbr/alerts/sweetalert2/sweetalert2.min.js"></script>
+
+
+</html>

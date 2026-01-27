@@ -1,0 +1,141 @@
+
+### Crear plan
+POST https://api.mercadopago.com/preapproval_plan
+Authorization: Bearer APP_USR-2024687790177599-062211-6308da8728fc0a0e433a23d95f7dc1a1-569347961
+Content-Type: application/json
+
+{
+  "reason": "Club de Beneficios",
+  "auto_recurring": {
+    "frequency": 1,
+    "frequency_type": "months",
+    "repetitions":null,
+    "billing_day": 10,
+    "billing_day_proportional": false,
+    "free_trial": {
+      "frequency": 1,
+      "frequency_type": "days",
+      "first_invoice_offset":0
+    },
+    "transaction_amount": 5,
+    "currency_id": "ARS"
+  },
+  "payment_methods_allowed": {
+    "payment_types": [
+ {"id":"credit_card"},{"id":"debit_card"}
+    ],
+    "payment_methods": [
+      {}
+    ]
+  },
+  "back_url": "https://www.aquaexpress.com.ar/aqua4d/aqua_pagos_mp/new_sub.html"
+}
+### Buscar en planes de suscripción
+GET https://api.mercadopago.com/preapproval_plan/search?limit=20
+Authorization: Bearer TEST-366679090114565-021115-000aa1eb53f8f32e450efac77a84c323-140528337
+
+### Detalle de plan de suscripción
+GET https://api.mercadopago.com/preapproval_plan/2c938084813ff7c60181455322fa0258
+Authorization: Bearer APP_USR-2955538941207241-060817-6bdd8acf26862f1dd775a14484eeb9d6-1139254331
+
+### Editar plan
+PUT https://api.mercadopago.com/preapproval_plan/2c938084813ff7c60181455322fa0258
+Authorization: Bearer APP_USR-2955538941207241-060817-6bdd8acf26862f1dd775a14484eeb9d6-1139254331
+Content-Type: application/json
+
+{
+  "reason": "Prueba TUser Vendedor",
+  "auto_recurring": {
+    "frequency": 1,
+    "frequency_type": "months",
+    "repetitions":null,
+    "billing_day": 15,
+    "billing_day_proportional": false,
+    "free_trial": {
+      "frequency": 1,
+      "frequency_type": "days",
+      "first_invoice_offset":0
+    },
+    "transaction_amount": 5,
+    "currency_id": "ARS"
+  },
+  "payment_methods_allowed": {
+    "payment_types": [
+ {"id":"credit_card"},{"id":"debit_card"}
+    ],
+    "payment_methods": [
+      {}
+    ]
+  },
+  "back_url": "https://www.aquaexpress.com.ar/aqua4d/aqua_pagos_mp/new_sub.html"
+}
+### Crear usuario de prueba (Cuenta mati11190)
+POST https://api.mercadopago.com/users/test_user?access_token=APP_USR-6954148875256722-040216-d8885848c1a5306085b89472ffcac5b4-77164922
+Authorization: Bearer APP_USR-6954148875256722-040216-d8885848c1a5306085b89472ffcac5b4-77164922
+Content-Type: application/json
+
+{
+    "site_id":"MLA"
+}
+
+### Crear usuario de prueba (Cuenta uE)
+POST https://api.mercadopago.com/users/test_user?access_token=TEST-366679090114565-021115-000aa1eb53f8f32e450efac77a84c323-140528337
+Authorization: Bearer TEST-366679090114565-021115-000aa1eb53f8f32e450efac77a84c323-140528337
+Content-Type: application/json
+
+{
+    "site_id":"MLA"
+}
+
+### Endpoint AE para realizar suscripción
+POST https://www.aquaexpress.com.ar/aqua4d/aqua_pagos_mp/suscripcion.php
+
+{
+    "email":"test_user_45738713@testuser.com",
+    "c_token":"ea37f6f9c10f7061ef7cd77535a15d40"
+}
+
+### Búsqueda de la suscripción
+GET https://api.mercadopago.com/preapproval/2c938084813ff7c60181455e88770266
+Authorization: Bearer APP_USR-2955538941207241-060817-6bdd8acf26862f1dd775a14484eeb9d6-1139254331
+
+### Búsqueda de un pago
+GET https://api.mercadopago.com/v1/payments/6153193364
+Authorization: Bearer APP_USR-2955538941207241-060817-6bdd8acf26862f1dd775a14484eeb9d6-1139254331
+
+### Obtener datos de suscripción
+GET https://www.aquaexpress.com.ar/aqua4d/aqua_pagos_mp/get_suscription.php
+
+### Obtener estado de facturación de suscripción
+GET https://api.mercadopago.com/authorized_payments/6153799770
+Authorization: Bearer APP_USR-2955538941207241-060817-6bdd8acf26862f1dd775a14484eeb9d6-1139254331
+
+### Búsqueda de la suscripción/authorized_payment
+POST https://www.aquaexpress.com.ar/aqua4d/aqua_pagos_mp/prueba_borrar.php
+Authorization: Bearer APP_USR-2955538941207241-060817-6bdd8acf26862f1dd775a14484eeb9d6-1139254331
+Content-Type: application/json
+
+{
+  "id":"2c938084814f19bf01814fefc1dc007e"
+}
+
+### Busqueda de tipo de suscripción AE
+GET http://turnos.aquaexpress.com.ar/aquaxp/vial/aquaapp/set_suscripcion/mati.mrqz@gmail.com
+
+### SEt de tipo de suscripción AE
+PUT http://turnos.aquaexpress.com.ar/aquaxp/vial/aquaapp/set_suscripcion/mati.mrqz@gmail.com
+p_tipo: 1
+
+### Consultar payment para obtener comprobante
+GET https://api.mercadopago.com/v1/payments/23138717197
+Authorization: Bearer APP_USR-2955538941207241-060817-6bdd8acf26862f1dd775a14484eeb9d6-1139254331
+
+### Prueba webhook endpoint
+POST https://www.aquaexpress.com.ar/aqua4d/aqua_pagos_mp/pago.php
+Content-Type: application/json
+
+{"action":"payment.created","api_version":"v1","data":{"id":"23588717654"},"date_created":"2022-06-30T13:47:36Z","id":102073367420,"live_mode":true,"type":"payment","user_id":"569347961"}
+
+
+### PruebaCOMPRA CRED
+POST https://www.aquaexpress.com.ar/aqua4d/aqua_pagos_mp/compra_cred.php

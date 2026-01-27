@@ -1,0 +1,39 @@
+{
+    "name": "appaquaexpress",
+    "displayName": "AquaExpress",
+    "version": "3.3.1",
+    "description": "Aplicación de AquaExpress",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "ecosystem:cordova"
+    ],
+    "author": "Apache Cordova Team",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "cordova": "^12.0.0"
+    },
+    "devDependencies": {
+        "@noahsun/cordova-plugin-qrscanner": "^3.0.10",
+        "cordova-android": "^12.0.1",
+        "cordova-plugin-geolocation": "^4.1.0",
+        "cordova-plugin-inappbrowser": "^5.0.0",
+        "cordova-plugin-keyboard": "^1.2.0",
+        "cordova-plugin-qrscanner": "^3.0.1"
+    },
+    "cordova": {
+        "plugins": {
+            "cordova-plugin-keyboard": {},
+            "cordova-plugin-geolocation": {
+                "GPS_REQUIRED": "true"
+            },
+            "cordova-plugin-inappbrowser": {},
+            "cordova-plugin-qrscanner": {}
+        },
+        "platforms": [
+            "android"
+        ]
+    }
+}

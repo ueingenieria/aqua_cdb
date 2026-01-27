@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='utf-8'?>
+	
+<widget id="com.aquaexpress.cdb" version="3.3.1" >
+
+    <name>Aqua Express</name>
+	<icon src="aqua_icon.png" />
+    <description>
+        Aplicacion de usuario Aqua Express
+    </description>
+    <author email="desarrollo@aquaexpress.com.ar" href="https://www.aquaexpress.com.ar">
+        Aqua Express
+    </author>
+    <content src="welcome.html" />
+	
+	<allow-navigation href="http://*.aquaexpress.com.ar/*" />
+    <access origin="*" />	
+    <allow-intent href="https://*"/>
+    <allow-intent href="http://*"/>
+
+    <platform name="android">
+        <preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/android/splashscreen.png" />
+        <preference name="AndroidWindowSplashScreenBackground" value="#006fa2" />
+		<preferance name="android-usesCleartextTraffic" value="true" />
+		<edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application" xmlns:android="http://schemas.android.com/apk/res/android">
+			<application android:networkSecurityConfig="@xml/network_security_config" />
+		</edit-config>
+	<resource-file src="network_security_config.xml" target="app/src/main/res/xml/network_security_config.xml" />
+    </platform>
+    <platform name="ios">
+    	<!-- iOS 8.0+ -->
+        <!-- iPhone 6 Plus  -->
+        <icon src="res/ios/icon-60@3x.png" width="180" height="180" />
+        <!-- iOS 7.0+ -->
+        <!-- iPhone / iPod Touch  -->
+        <!-- <icon src="res/ios/icon-60.png" width="60" height="60" /> -->
+        <icon src="res/ios/icon-60@2x.png" width="120" height="120" />
+        <!-- iPad -->
+        <icon src="res/ios/icon-76@1x.png" width="76" height="76" />
+        <icon src="res/ios/icon-76@2x.png" width="152" height="152" />
+        <!-- Spotlight Icon -->
+        <icon src="res/ios/icon-40@1x.png" width="40" height="40" />
+        <icon src="res/ios/icon-40@2x.png" width="80" height="80" />
+        <!-- iOS 6.1 -->
+        <!-- iPhone / iPod Touch -->
+        <!-- <icon src="res/ios/icon.png" width="57" height="57" /> -->
+        <!-- <icon src="res/ios/icon@2x.png" width="114" height="114" /> -->
+        <!-- iPad -->
+        <!-- <icon src="res/ios/icon-72.png" width="72" height="72" /> -->
+        <!-- <icon src="res/ios/icon-72@2x.png" width="144" height="144" /> -->
+        <!-- iPad Pro -->
+        <!-- <icon src="res/ios/icon-167.png" width="167" height="167" /> -->
+        <!-- iPhone Spotlight and Settings Icon -->
+        <icon src="res/ios/icon-29@1x.png" width="29" height="29" />
+        <icon src="res/ios/icon-29@2x.png" width="58" height="58" />
+        <icon src="res/ios/icon-29@3x.png" width="87" height="87" />
+        <icon src="res/ios/icon-29@3x.png" width="87" height="87" />
+        <icon src="res/ios/iTunesArtwork@1x.png" width="512" height="512" />
+        <icon src="res/ios/iTunesArtwork@2x.png" width="1024" height="1024"/>
+        <icon src="res/ios/iTunesArtwork@1x3x.png" width="1536" height="1536" />
+        <!-- iPad Spotlight and Settings Icon -->
+        <!-- <icon src="res/ios/icon-50.png" width="50" height="50" /> -->
+        <!-- <icon src="res/ios/icon-50@2x.png" width="100" height="100" /> -->
+        <!-- iPad Pro -->
+        <icon src="res/ios/icon-83.5@2x.png" width="167" height="167" />
+        <edit-config file="*-Info.plist" mode="merge" target="NSLocationWhenInUseUsageDescription">
+        <string>Te mostramos lavaderos cercanos a tu ubicacion</string>
+        </edit-config>
+    </platform>
+    <preference name="Fullscreen" value="false"/>
+    <preference name="DisallowOverscroll" value="true"/>
+	<preference name="InterceptRemoteRequests" value="none" />
+	<preference name="KeyboardShrinksView" value="true" />
+	<preference name="Orientation" value="portrait" />
+	<preference name="Scheme" value="http" />
+</widget>

@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0ea5e9;
+  /* Sky 500 */
+  --color-secondary: #0284c7;
+  /* Sky 600 */
+  --color-accent: #f59e0b;
+  /* Amber 500 */
+}
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+body {
+  background-color: #F9FAFB;
+  /* gray-50 */
+  color: #111827;
+  /* gray-900 */
+}

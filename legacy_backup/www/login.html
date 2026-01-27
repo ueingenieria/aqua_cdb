@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html id="win">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, width=device-width" />
+
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' gap: https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src *; connect-src *">
+
+    <script type="text/javascript">
+        function trim(el) {
+            el.value = el.value.replace(/ /g, "") // removes leading and trailing spaces
+        }
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <title>Aqua Express</title>
+</head>
+
+<body>
+    <a id="atras" class='flotante' href='#'> <img src="./img/atras.svg"> </a>
+
+    <div class="cargando" id="autolog_screen">
+        <h1>BIENVENIDO</h1>
+        <div class="spinner-simple"></div>
+        <label>Cargando</label>
+    </div>
+
+    <div class="cotenedor" style="height:100%;">
+
+        <div id="ohsnap"></div>
+
+        <div class="encabezado1">
+            <img src="img/aqua_logo.png" width="60%">
+        </div>
+
+
+        <div class="formularios" id="form_login">
+            <div class="frm">
+                <ul>
+                    <li><label>E-mail: </label><input class="input_text" type="email" name="femail" size="25" oninput="trim(this)" required/></li>
+                    <li><label>Contraseña: </label><input class="input_pass" type="password" name="fpass" size="25" oninput="trim(this)" required/> <button class="pass" id="pass_show" onclick="togglepass()"></button></li>
+                </ul>
+                <button id="login_submit">Iniciá Sesión</button>
+            </div>
+        </div>
+        <div id="login_help">
+            <p><a href="javascript:cambio_pass();">Olvidé mi contraseña</a></p>
+        </div>
+
+
+
+
+    </div>
+
+</body>
+
+<script type="text/javascript" src="cordova.js"></script>
+<script src="js/jquery.min.js"></script>
+<link rel="stylesheet" href="res/lbr/alerts/sweetalert2/dark.css">
+<script type="text/javascript" src="res/lbr/alerts/sweetalert2/sweetalert2.min.js"></script>
+<script type="text/javascript">
+    $("html").height($(document).height());
+</script>
+<script type="text/javascript" src="js/fetch_opt.js"></script>
+<script type="text/javascript" src="js/login.js"></script>
+
+
+</html>
