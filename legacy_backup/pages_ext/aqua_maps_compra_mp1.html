@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Cache-Control" content="post-check=0, pre-check=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <title>Compra Creditos</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+        
+        #map {
+            height: 100vh;
+        }
+        
+        .splide {
+            position: fixed;
+            bottom: 10.2rem;
+            left: 0px;
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+        }
+        
+        .splide__slide__container {
+            background-color: #ffffff91;
+            border: solid 0.3em lightgrey;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: start;
+            width: 50vw;
+        }
+        
+        .info {
+            height: 75%;
+        }
+        
+        .titulo {
+            margin: 4% 2% 5% 2%;
+            text-align: center;
+            color: #091782;
+            font-size: 1.4em;
+        }
+        
+        .precio {
+            text-align: center;
+            margin: 0px 3%;
+            font-style: italic;
+            color: #383838;
+            font-weight: 300;
+            font-size: 0.9em;
+        }
+        
+        .boton-compra {
+            border: none;
+            background-color: coral;
+            font-size: 1em;
+            height: 4vh;
+            color: white;
+            margin-bottom: 3%;
+        }
+        
+        .btnn {
+            width: 2em;
+            height: 2em;
+            border-radius: 0px;
+            background-color: #707070;
+            font-size: 1.4em;
+            font-weight: bold;
+            text-align: center;
+            border: 0;
+            padding: 0px;
+            color: white;
+        }
+        
+        .btnn:active {
+            background-color: #a0a0a0;
+        }
+        
+        .cred_text {
+            font-size: 1.5em;
+            font-weight: bold;
+            font-family: Roboto;
+            margin: 0.3em 0.5em;
+            display: inline-block;
+            min-width: 2em;
+        }
+        
+        .swal2-html-container {
+            padding-top: 5%;
+        }
+        
+        .swal2-actions {
+            margin: 0.25em auto 0 !important;
+            padding: 0 0.6em !important;
+        }
+        
+        .swal2-loader {
+            border-color: rgb(235, 116, 0) transparent rgb(235, 116, 0) transparent !important;
+        }
+        /* Optional: Makes the sample page fill the window. */
+        
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Roboto;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@2.4.21/dist/css/themes/splide-default.min.css">
+</head>
+
+<body>
+    <div id="map"></div>
+    <button id="button"></button>
+    <div class="splide">
+        <div class="splide__track">
+            <ul id="slider" class="splide__list">
+                <!-- <li class="splide__slide">
+          <div class="splide__slide__container">
+            <div class="info">
+              <h2 class="titulo">Aqua Unimev</h2>
+              <p class="direccion">Axion Unimev frente a vea Unimev</p>
+            </div>
+            <div>
+                <button class="boton-compra">Comprar creditos</button>
+            </div>
+          </div>
+          </li> -->
+            </ul>
+        </div>
+    </div>
+</body>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA88F-102I-6vf11EDKFMvn_WKOjc2eIG4"></script>
+<script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@2.4.21/dist/js/splide.min.js"></script>
+<link rel="stylesheet" href="res\dark.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+    // In this example, we center the map, and add a marker, using a LatLng object
+    // literal instead of a google.maps.LatLng object. LatLng object literals are
+    // a convenient way to add a LatLng coordinate and, in most cases, can be used
+    // in place of a google.maps.LatLng object.
+    var queryDict = {}
+    location.search.substr(1).split("&").forEach(function(item) {
+        queryDict[item.split("=")[0]] = item.split("=")[1]
+    })
+    var lat_actual = parseFloat(queryDict.lat);
+    var long_actual = parseFloat(queryDict.long);
+    var zoom_actual = parseInt(queryDict.zoom);
+    var email = queryDict.mail;
+    var name = queryDict.nombre;
+    var map;
+    var indexLavaderoCercano = 0;
+    var distancias = [];
+    var click = false;
+    var rcv_pos = {
+        lat: lat_actual,
+        lng: long_actual,
+    }
+    var lavaderos;
+    var cant_cred;
+    var boton = []
+    var slider = document.getElementById("slider");
+    var splide = new Splide('.splide', {
+        type: 'loop',
+        perPage: 2,
+        height: '8rem',
+        focus: 'center',
+        trimSpace: false,
+        arrows: false,
+        pagination: false,
+        gap: '2em',
+        cover: true,
+    });
+
+    fetch('consulta_lav.php')
+    .then(res => res.json())
+    .then((data) => {
+        if (!data.success) {
+            console.error("Error:", data.message);
+            return;
+        }
+
+    fetch('https://www.aquaexpress.com.ar/aqua4d/lista_lavaderos.php')
+        .then(res => res.json())
+        .then((out) => {
+            lavaderos = out.items.filter((item) => {
+                return item.tipo_lavadero != "4D" && item.direccion != 'OCULTO';
+            });
+            for (var i = 0; i < (lavaderos.length); i++) {
+
+                var titulo = document.createElement("h2");
+                titulo.setAttribute("class", "titulo");
+                titulo.innerHTML = lavaderos[i].nombre;
+
+                var precio = document.createElement("p");
+                precio.setAttribute("class", "precio");
+
+                // 🔹 Buscar coincidencia entre `external_id` y `nombre`
+                let coincidencia = data.items.find(item => item.nombre.trim() === lavaderos[i].external_id?.trim());
+
+                if (coincidencia) {
+
+                    // Convertir `pes_cred` a número para evitar problemas de comparación
+                    let pesCred = Number(coincidencia.pes_cred);
+
+                    if (pesCred === 0) {
+                        precio.innerHTML = "Valor Crédito: $" + lavaderos[i].precio_credito;
+                    } else if (pesCred === 1) {
+                        precio.innerHTML = "Valor Crédito: $" + coincidencia.precio_credito;
+                        lavaderos[i].precio_credito = coincidencia.precio_credito;
+                    } else {
+                        precio.innerHTML = "Valor Crédito no disponible";
+                    }
+                }
+
+                boton[i] = document.createElement("button");
+                boton[i].setAttribute("class", "boton-compra");
+                boton[i].innerHTML = "Comprar créditos"
+                var divinfo = document.createElement("div");
+                divinfo.setAttribute("class", "info")
+                divinfo.appendChild(titulo);
+                divinfo.appendChild(precio);
+                var container = document.createElement("div")
+                container.setAttribute("class", "splide__slide__container");
+                container.appendChild(divinfo);
+                container.appendChild(boton[i]);
+                var item = document.createElement("li");
+                item.setAttribute("class", "splide__slide");
+                item.appendChild(container);
+                slider.appendChild(item);
+                boton[i].setAttribute("onclick", "compraCreditos(" + i + ")");
+                distancias[i] = Math.abs(modulo((lat_actual - lavaderos[i].latitud), (long_actual - lavaderos[i].longitud)))
+            }
+            indexLavaderoCercano = distancias.findIndex((item) => item == Math.min.apply(null, distancias));
+            splide.mount();
+            splide.on('moved', function(newIndex, oldIndex) {
+                window["infowindow" + oldIndex].close(map, window["marker" + oldIndex]);
+                window["infowindow" + newIndex].open(map, window["marker" + newIndex]);
+                if (!click) {
+                    let pos = window["infowindow" + newIndex].getPosition().toJSON();
+                    map.setCenter(pos);
+                } else {
+                    click = false;
+                }
+            })
+            initialize()
+                .then(() => {
+                    Swal.fire({
+                        text: "Buscando el lavadero mas cercano...",
+                        allowOutsideClick: false,
+                        width: '80%',
+                        showConfirmButton: false,
+                        onBeforeOpen: () => {
+                            Swal.showLoading()
+                        }
+                    })
+                    setTimeout(() => {
+                        splide.go(indexLavaderoCercano);
+                        Swal.close();
+                        Swal.fire({
+                            title: 'Importante',
+                            html: "Desde acá podés comprar créditos para usar <b>sólo</b> en lavaderos autoservicio (autolavados)<br>No son válidos para lavaderos AquaExpress 4D",
+                            icon: 'warning',
+                            showCancelButton: false,
+                            showCloseButton: true,
+                            confirmButtonText: 'Entendido'
+                        })
+
+                    }, 1000)
+                })
+                .catch((err) => {
+                    console.log(err)
+                });
+
+            // setTimeout(()=>{
+            //   console.log("Timeout!")
+            //   splide.go(indexLavaderoCercano);
+            // },10000);
+        })
+        // .then(()=>{
+        //   splide.go(indexLavaderoCercano);
+        // })
+        .catch((err) => {
+            Swal.fire("Ups!", "Ha ocurrido un error. Intenta nuevamente mas tarde." + err, "error")
+        })
+    })
+    .catch(error => console.error("Error en la primera solicitud:", error));
+
+    function modulo(i, j) {
+        return ((i ** 2) + (j ** 2));
+    }
+
+    function initialize() {
+        return new Promise(function(resolve, reject) {
+            //Opciones del mapa inicial
+            if (lat_actual == null && long_actual == null) {
+                reject("No se ha provisto de datos de localización")
+            }
+            var mapOptions = {
+                zoom: zoom_actual,
+                center: {
+                    lat: lat_actual,
+                    lng: long_actual
+                },
+                disableDefaultUI: true,
+            };
+
+            //Creacion del mapa inicial
+            map = new google.maps.Map(document.getElementById('map'), mapOptions);
+            infoWindow = new google.maps.InfoWindow();
+            infoWindow.setPosition(rcv_pos);
+            infoWindow.setContent("Tu ubicación");
+            const upperText = document.createElement("h2");
+            upperText.innerHTML = "SELECCIONA TU LAVADERO";
+            upperText.style.margin = "0px 5px";
+            upperText.style.backdropFilter = "blur(2px)";
+            upperText.style.backgroundColor = "#0182bdbf";
+            upperText.style.padding = "2%";
+            upperText.style.color = "#ffffff";
+            upperText.style.width = "-webkit-fill-available";
+            upperText.style.textAlign = "center";
+            upperText.style.borderRadius = "0px 0px 10px 10px"
+            map.controls[google.maps.ControlPosition.TOP_LEFT].push(upperText);
+            var locationButton = document.getElementById("button");
+            locationButton.innerHTML = '<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="crosshairs" style="width:2em; height:2em;" class="svg-inline--fa fa-crosshairs fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M500 224h-30.364C455.724 130.325 381.675 56.276 288 42.364V12c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v30.364C130.325 56.276 56.276 130.325 42.364 224H12c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h30.364C56.276 381.675 130.325 455.724 224 469.636V500c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12v-30.364C381.675 455.724 455.724 381.675 469.636 288H500c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12zM288 404.634V364c0-6.627-5.373-12-12-12h-40c-6.627 0-12 5.373-12 12v40.634C165.826 392.232 119.783 346.243 107.366 288H148c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12h-40.634C119.768 165.826 165.757 119.783 224 107.366V148c0 6.627 5.373 12 12 12h40c6.627 0 12-5.373 12-12v-40.634C346.174 119.768 392.217 165.757 404.634 224H364c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h40.634C392.232 346.174 346.243 392.217 288 404.634zM288 256c0 17.673-14.327 32-32 32s-32-14.327-32-32c0-17.673 14.327-32 32-32s32 14.327 32 32z"></path></svg>';
+            locationButton.classList.add("custom-map-control-button");
+            locationButton.style.color = "#000000";
+            locationButton.style.padding = "0.35em 0.3em 0.2em 0.3em";
+            locationButton.style.border = "none";
+            locationButton.style.position = "absolute";
+            locationButton.style.right = "5px";
+            locationButton.style.backgroundColor = "#ffffffb8";
+            locationButton.style.backdropFilter = "blur(2px)";
+            locationButton.style.borderRadius = "10px";
+            locationButton.style.bottom = "10.5rem";
+            locationButton.addEventListener("click", () => {
+                infoWindow.open(map);
+                map.setCenter(rcv_pos);
+            });
+            infoWindow.open(map);
+
+            for (var i = 0; i < lavaderos.length; i += 1) {
+                var icon = {
+                    url: "https://www.aquaexpress.com.ar/aqua4d/images/mapa/icon_lav.png", // url
+                    scaledSize: new google.maps.Size(50, 50), // size
+                };
+                window["marker" + i] = new google.maps.Marker({
+                    position: {
+                        lat: parseFloat(lavaderos[i].latitud),
+                        lng: parseFloat(lavaderos[i].longitud)
+                    },
+                    map: map,
+                    icon: icon,
+                    title: lavaderos[i].nombre
+                });
+
+                var contentString = `<h2 style="margin-block-start:0.2em;margin-block-end:0.1em"><span class='glyphicon glyphicon-asterisk' aria-hidden='true'></span>&#160;${lavaderos[i].nombre}</h2><p style="margin-block-start:0.1em;margin-block-end:0.2em"><span class='glyphicon glyphicon-screenshot' aria-hidden='true'></span>&#160;<b>Direccion</b><br>${lavaderos[i].direccion} </p>`
+
+                window["infowindow" + i] = new google.maps.InfoWindow({
+                    content: contentString
+                });
+
+                eval(
+                    "marker" + i + ".addListener('click', () => {splide.go(" + i + ");click=true;});"
+                )
+            }
+            resolve()
+        })
+    }
+
+    function compraCreditos(item) {
+        cant_cred = 1;
+        Swal.fire({
+            title: '¿Cuántos créditos vas a comprar?',
+            html: `<button type="button" class="btnn" id="btn_rest" onclick="restar(${item})">-</button> <label id="cred_cant" class="cred_text">${cant_cred}</label><button type="button" onclick="sumar(${item})" class="btnn" id="btn_sum">+</button><br><label id="total" class="cred_text">Total: $${cant_cred * (lavaderos[item].precio_credito)}</label>`,
+            focusConfirm: false,
+            showConfirmButton: true,
+            showCancelButton: true,
+            confirmButtonText: "Continuar &rarr;",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true,
+            focusConfirm: false,
+            focusCancel: false,
+            footer: "Estas comprando para " + lavaderos[item].nombre,
+            preConfirm: () => {
+                confirmaCompra(item);
+            }
+        });
+    }
+
+    function sumar(i) {
+        cant_cred++;
+        document.getElementById("cred_cant").innerHTML = cant_cred;
+        document.getElementById("total").innerHTML = "Total: $" + cant_cred * (lavaderos[i].precio_credito);
+    }
+
+    function restar(i) {
+        if (cant_cred > 1) {
+            cant_cred--;
+            document.getElementById("cred_cant").innerHTML = cant_cred;
+            document.getElementById("total").innerHTML = "Total: $" + cant_cred * (lavaderos[i].precio_credito);
+        }
+    }
+
+    function confirmaCompra(item) {
+        a_cobrar = lavaderos[item].precio_credito * cant_cred;
+
+        const swalWithBootstrapButtons = Swal.mixin({
+            customClass: {
+                confirmButton: 'btn btn-success',
+                cancelButton: 'btn btn-cancel'
+            },
+            buttonsStyling: true
+        })
+
+        swalWithBootstrapButtons.fire({
+            title: 'Como querés pagar?',
+            text: "Total: $" + a_cobrar,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '<img src="images/boton_bill.png" width="40px"><br>Dinero en cuenta Aqua',
+            confirmButtonColor: "#e97400",
+            cancelButtonText: '<img src="images/boton_tarj.png" width="40px"><br>Tarjeta crédito / débito',
+            cancelButtonColor: "#e97400",
+            showCloseButton: true,
+            reverseButtons: false
+        }).then((result) => {
+            if (result.value) {
+                Swal.queue([{
+                    icon: "warning",
+                    title: 'Confirmación',
+                    confirmButtonText: 'Confirmar',
+                    html: "Se descontarán <b>$" + a_cobrar + "</b> del saldo en tu cuenta Aqua.",
+                    cancelButtonText: "Cancelar",
+                    showCancelButton: true,
+                    focusConfirm: false,
+                    focusCancel: false,
+                    showLoaderOnConfirm: true,
+                    reverseButtons: true,
+                    preConfirm: () => {
+                        const data = `accion=58&email=${email}&a_cobrar=${a_cobrar}&cant_cred=${cant_cred}&id_lavadero=${lavaderos[item].external_id}`
+                        return fetch("https://www.aquaexpress.com.ar/aqua4d/aqua_4d.php", {
+                                method: 'POST',
+                                mode: 'same-origin',
+                                headers: {
+                                    "Content-type": "application/x-www-form-urlencoded",
+                                },
+                                body: data
+                            })
+                            .then(function(response) {
+                                if (response.status != 200) {
+                                    response.text().then((err) => {
+                                        Swal.fire("Ups!", err, "error")
+                                    });
+                                } else {
+                                    response.json().then((msg) => {
+                                        if (msg.status == "ok") {
+                                            Swal.fire("Listo!", msg.msg, "success")
+                                        } else {
+                                            Swal.fire("Ups!", msg.msg, "error")
+                                        }
+                                    });
+                                }
+                            })
+                            .catch(function(err) {
+                                Swal.fire("Ups!", err, "error")
+                            })
+                    }
+                }])
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+
+                Swal.fire({
+                    text: "Esperá...",
+                    allowOutsideClick: false,
+                    width: "50%",
+                    showConfirmButton: false,
+                    onBeforeOpen: () => {
+                        Swal.showLoading()
+                    }
+                })
+
+                const data2 = "a_cobrar=" + a_cobrar + "&email=" + email + "&nombre=" + name + "&cant_cred=" + cant_cred + "&valido_en=" + lavaderos[item].external_id;
+                return fetch("https://www.aquaexpress.com.ar/aqua4d/aqua_pagos_mp/compra_cred.php", {
+                        method: 'POST',
+                        headers: {
+                            "Content-type": "application/x-www-form-urlencoded",
+                        },
+                        body: data2
+                    })
+                    .then(function(response) {
+                        if (response.ok) {
+                            return response.text()
+                        } else {
+                            Swal.fire("Ups!", "Hay problemas con la conexión. Intentá de nuevo (001)", "error")
+                        }
+                    })
+                    .then(function(url) {
+                        console.log(url)
+                        if (url.match(/^(http|https)\:\/\/[a-z0-9\.-]+\.[a-z]{2,4}/gi)) {
+                            location.replace(url);
+                        } else {
+                            Swal.fire("Ups!", "Tenemos problemas técnicos. Intentá de nuevo (002)", "error")
+                        }
+                    })
+                    .catch(function(err) {
+                        Swal.fire("Ups!", "Tenemos problemas técnicos. Intentá de nuevo (003)" + err, "error")
+                    })
+            }
+        })
+    }
+</script>
+
+</html>

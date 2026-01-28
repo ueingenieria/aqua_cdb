@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS push_tokens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT DEFAULT NULL,
+    token VARCHAR(500) NOT NULL,
+    platform VARCHAR(50) DEFAULT 'web',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_token (token),
+    KEY idx_user_id (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

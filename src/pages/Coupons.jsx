@@ -7,6 +7,7 @@ import { Input } from '../components/ui/Input';
 import { Loader2, TicketX, Plus, X, Copy } from 'lucide-react';
 import { Tab } from '@headlessui/react';
 import { clsx } from 'clsx';
+import ClubSubscription from '../components/club/ClubSubscription';
 
 export default function Coupons() {
     const { user } = useAuth();
@@ -119,6 +120,8 @@ export default function Coupons() {
                     <TicketX className="h-6 w-6" />
                 </div>
             </header>
+
+            <ClubSubscription hideIfSubscribed />
 
             <Tab.Group>
                 <Tab.List className="flex space-x-1 rounded-xl bg-gray-200/50 p-1">

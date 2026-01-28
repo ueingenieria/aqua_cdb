@@ -67,7 +67,7 @@ export default function Wallet() {
                             style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.5)' }}>
                             Saldo Actual
                         </p>
-                        <h2 className="text-6xl font-black tracking-tighter text-white"
+                        <h2 className="text-5xl font-black tracking-tighter text-white"
                             style={{
                                 textShadow: '2px 2px 0px #0e7490, 4px 4px 0px rgba(0,0,0,0.2)',
                                 WebkitTextStroke: '1px rgba(255,255,255,0.2)'
@@ -91,10 +91,10 @@ export default function Wallet() {
             </div>
 
             <div className="space-y-4">
-                <h3 className="font-bold text-white">Recargar Saldo</h3>
+                <h3 className="font-bold text-white drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">Recargar Saldo</h3>
                 <form onSubmit={handleRecharge} className="space-y-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-white/90">Monto a cargar</label>
+                        <label className="text-sm font-medium text-white/90 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">Monto a cargar</label>
                         <div className="relative">
                             <span className="absolute left-3 top-2.5 text-gray-500 font-bold">$</span>
                             <Input

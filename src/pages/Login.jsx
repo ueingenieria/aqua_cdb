@@ -5,8 +5,10 @@ import { Input } from '../components/ui/Input';
 import { useNavigate } from 'react-router-dom';
 import { User, Lock, Loader2 } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
+import Logo from '../assets/logo_aqua_4d.png';
 
 export default function Login() {
+    // ... hooks ...
     const { login, loginWithGoogle } = useAuth();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({ email: '', password: '' });
@@ -14,6 +16,7 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
 
     const googleLogin = useGoogleLogin({
+        // ... callbacks ...
         onSuccess: async (tokenResponse) => {
             setLoading(true);
             try {
@@ -28,6 +31,7 @@ export default function Login() {
         onError: () => setError('Error al iniciar sesión con Google'),
     });
 
+    // ... submit ...
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -49,14 +53,12 @@ export default function Login() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
             <div className="w-full max-w-sm space-y-8 animate-in fade-in zoom-in duration-300">
-                <div className="text-center space-y-2">
-                    <div className="mx-auto w-24 h-24 mb-6 relative">
-                        <img src="/img/logo.png" alt="AquaExpress" className="w-full h-full object-contain" onError={(e) => e.target.style.display = 'none'} />
-                        {/* Fallback si no hay logo aun */}
-                        <div className="absolute inset-0 flex items-center justify-center bg-primary/10 rounded-full -z-10 blur-xl"></div>
+                <div className="text-center">
+                    <div className="mx-auto w-96 h-auto -mb-6 relative">
+                        <img src={Logo} alt="AquaExpress" className="w-full h-full object-contain" />
                     </div>
 
-                    <h2 className="text-3xl font-bold tracking-tight text-gray-900">Bienvenido</h2>
+                    <h2 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">Bienvenido</h2>
                     <p className="text-gray-500">Ingresá a tu cuenta para continuar</p>
                 </div>
 

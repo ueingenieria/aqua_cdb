@@ -1,9 +1,9 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { Home, Ticket, User, QrCode } from 'lucide-react';
+import { Home, Ticket, User, QrCode, Wallet } from 'lucide-react';
 import { clsx } from 'clsx';
-import { InstallPrompt } from '../ui/InstallPrompt';
+import InstallPWA from '../ui/InstallPWA';
 
-import globalBg from '../../assets/fondo.png';
+import globalBg from '../../assets/fondo2.png';
 
 export default function MainLayout() {
     return (
@@ -39,7 +39,7 @@ export default function MainLayout() {
                 <Outlet />
             </main>
 
-            <InstallPrompt />
+            <InstallPWA />
         </div>
     );
 }
@@ -50,7 +50,7 @@ function NavItmes({ mobile }) {
         { to: "/cupones", icon: Ticket, label: "Cupones" },
         { to: "/qr", icon: QrCode, label: "QR", highlight: true },
         { to: "/perfil", icon: User, label: "Perfil" },
-        { to: "/billetera", icon: User, label: "Billetera" }, // Added Wallet back
+        { to: "/billetera", icon: Wallet, label: "Billetera" }, // Added Wallet back
     ];
 
     return items.map((item) => (

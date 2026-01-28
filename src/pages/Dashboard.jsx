@@ -1,19 +1,47 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { CreditCard, Star, Ticket, Plus, MapPin, ExternalLink, LogOut } from 'lucide-react';
+import { CreditCard, Star, Ticket, Plus, MapPin, ExternalLink, LogOut, Clock, Award, Mail } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { getLavaderos, findNearestLaundry, calculateDistance } from '../api/locations';
 import { useNavigate } from 'react-router-dom';
 
 import botMapa from '../assets/bot_mapa2.png';
-import suscribiteBtn from '../assets/suscribite.png';
 
 export default function Dashboard() {
-    const { user, logout } = useAuth();
+    const { user, logout, refreshBalance, subscriptionStatus, refreshSubscriptionStatus } = useAuth();
     const navigate = useNavigate();
     const [nearestLaundry, setNearestLaundry] = useState(null);
+    const [userLocation, setUserLocation] = useState(null);
     const [distance, setDistance] = useState(null);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+    const [hasUnreadNews, setHasUnreadNews] = useState(false);
+
+    useEffect(() => {
+        refreshBalance();
+        checkUnreadNews();
+        refreshSubscriptionStatus();
+    }, []);
+
+    const checkUnreadNews = async () => {
+        try {
+            // Import dynamically or assume imported
+            const { getNews } = await import('../api/news');
+            const news = await getNews();
+            if (news && news.length > 0) {
+                const latestId = news[0].id;
+                const lastReadId = localStorage.getItem('last_read_news_id');
+
+                // If never read or new ID is greater than last read
+                if (!lastReadId || parseInt(latestId) > parseInt(lastReadId)) {
+                    setHasUnreadNews(true);
+                }
+            }
+        } catch (err) {
+            console.error("Error checking news", err);
+        }
+    };
+
 
     useEffect(() => {
         // Geolocalización Legacy Logic
@@ -22,6 +50,7 @@ export default function Dashboard() {
                 try {
                     const lavaderos = await getLavaderos();
                     const pos = { lat: position.coords.latitude, lon: position.coords.longitude };
+                    setUserLocation(pos);
 
                     const nearest = findNearestLaundry(pos, lavaderos);
                     if (nearest) {
@@ -32,22 +61,30 @@ export default function Dashboard() {
                 } catch (e) {
                     console.error("Error fetching locations", e);
                 }
-            }, (err) => console.error(err), { enableHighAccuracy: true });
+            }, (err) => {
+                console.error(err);
+                // Default location (Mendoza) on error
+                setUserLocation({ lat: -32.890674, lon: -68.839440 });
+            }, { enableHighAccuracy: true });
+        } else {
+            setUserLocation({ lat: -32.890674, lon: -68.839440 });
         }
     }, []);
 
     // Handlers for Legacy External Links
     const openCredits = () => {
-        window.open(`https://www.aquaexpress.com.ar/aqua4d/aqua_maps_compra_mp1.html?mail=${user.email}&nombre=${user.name}`, '_system');
+        const lat = userLocation?.lat || -32.890674;
+        const lon = userLocation?.lon || -68.839440;
+        navigate('/creditos-mapa', { state: { location: { lat, lon } } });
     };
 
     const openLocations = () => {
-        window.open(`https://www.aquaexpress.com.ar/aqua4d/aqua_maps3.html?platform=browser`, '_system');
+        const lat = userLocation?.lat || -32.890674;
+        const lon = userLocation?.lon || -68.839440;
+        navigate('/mapa', { state: { location: { lat, lon } } });
     };
 
-    const openSubscription = () => {
-        window.open(`https://www.aquaexpress.com.ar/aqua4d/aqua_pagos_mp/checkout.html?email=${user.email}`, '_system');
-    };
+
 
     return (
         <div className="p-6 space-y-6 max-w-4xl mx-auto animate-in fade-in duration-500 pb-24 relative">
@@ -87,7 +124,7 @@ export default function Dashboard() {
 
             {/* Accesos Rápidos */}
             <div>
-                <h3 className="font-bold text-white mb-4 text-lg">Accesos Rápidos</h3>
+                <h3 className="font-bold text-white mb-4 text-lg drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">Accesos Rápidos</h3>
                 <div className="grid grid-cols-3 gap-3">
                     <div onClick={() => navigate('/cupones')} className="bg-white p-4 rounded-2xl border border-gray-100 text-center space-y-2 hover:shadow-md transition-shadow cursor-pointer">
                         <div className="mx-auto h-12 w-12 bg-green-50 rounded-full flex items-center justify-center text-green-600">
@@ -100,29 +137,52 @@ export default function Dashboard() {
                         <div className="mx-auto h-12 w-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
                             <CreditCard className="h-6 w-6" />
                         </div>
-                        <p className="text-sm font-medium text-gray-700">Créditos</p>
+                        <p className="text-sm font-medium text-gray-700">Autolavado</p>
                     </div>
 
                     <div onClick={openLocations} className="bg-white p-4 rounded-2xl border border-gray-100 text-center space-y-2 hover:shadow-md transition-shadow cursor-pointer">
                         <div className="mx-auto h-12 w-12 bg-orange-50 rounded-full flex items-center justify-center text-orange-600">
                             <MapPin className="h-6 w-6" />
                         </div>
-                        <p className="text-sm font-medium text-gray-700">Mapas</p>
+                        <p className="text-sm font-medium text-gray-700">Lavaderos</p>
                     </div>
 
-                    <div onClick={() => alert("Beneficios próximamente")} className="bg-white p-4 rounded-2xl border border-gray-100 text-center space-y-2 hover:shadow-md transition-shadow cursor-pointer">
+                    <div onClick={() => navigate('/actividad')} className="bg-white p-4 rounded-2xl border border-gray-100 text-center space-y-2 hover:shadow-md transition-shadow cursor-pointer">
                         <div className="mx-auto h-12 w-12 bg-purple-50 rounded-full flex items-center justify-center text-purple-600">
-                            <Star className="h-6 w-6" />
+                            <Clock className="h-6 w-6" />
+                        </div>
+                        <p className="text-sm font-medium text-gray-700">Actividad</p>
+                    </div>
+
+                    <div onClick={() => navigate('/novedades')} className="bg-white p-4 rounded-2xl border border-gray-100 text-center space-y-2 hover:shadow-md transition-shadow cursor-pointer relative">
+                        {hasUnreadNews && (
+                            <span className="absolute top-3 right-3 flex h-3 w-3">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                            </span>
+                        )}
+                        <div className={`mx-auto h-12 w-12 rounded-full flex items-center justify-center transition-colors ${hasUnreadNews ? 'bg-red-50 text-red-500' : 'bg-indigo-50 text-indigo-600'}`}>
+                            <Mail className={`h-6 w-6 ${hasUnreadNews ? 'animate-pulse' : ''}`} />
+                        </div>
+                        <p className="text-sm font-medium text-gray-700">Novedades</p>
+                    </div>
+
+                    <div onClick={() => navigate('/beneficios')} className="bg-white p-4 rounded-2xl border border-gray-100 text-center space-y-2 hover:shadow-md transition-shadow cursor-pointer relative">
+                        {subscriptionStatus !== 'authorized' && (
+                            <span className="absolute top-3 right-3 flex h-3 w-3">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                            </span>
+                        )}
+                        <div className={`mx-auto h-12 w-12 rounded-full flex items-center justify-center transition-colors ${subscriptionStatus !== 'authorized' ? 'bg-green-50 text-green-600' : 'bg-yellow-50 text-yellow-600'}`}>
+                            <Award className="h-6 w-6" />
                         </div>
                         <p className="text-sm font-medium text-gray-700">Beneficios</p>
                     </div>
                 </div>
             </div>
 
-            {/* Aqua Club Subscription Image Button */}
-            <div onClick={openSubscription} className="cursor-pointer hover:opacity-95 transition-all transform active:scale-98 max-w-sm mx-auto">
-                <img src={suscribiteBtn} alt="Suscribite a Aqua Club" className="w-full h-auto rounded-2xl shadow-lg" />
-            </div>
+
 
             {/* Lavadero Cercano (Legacy Feature) */}
             {nearestLaundry && (

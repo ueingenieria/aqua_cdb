@@ -1,22 +1,25 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { modifyUser, deleteUser } from '../api/user';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Loader2, CreditCard, Trash2, Save, Lock, User, ArrowLeft, X } from 'lucide-react';
+import { Loader2, CreditCard, Trash2, Save, Lock, Unlock, User, ArrowLeft, X } from 'lucide-react';
+import { modifyUser, deleteUser, toggleCardLock, linkCard } from '../api/user';
+import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
-    const { user, logout } = useAuth();
+    const { user, logout, refreshBalance } = useAuth();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         name: user.name || '',
         surname: user.surname || '',
         dni: user.dni || '',
-        tag: user.tag || '-'
+        tag: user.tag || '-',
+        tagLock: user.tagLock || '0'
     });
     const [editing, setEditing] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [loadingLock, setLoadingLock] = useState(false);
     const [showLinkModal, setShowLinkModal] = useState(false);
 
     useEffect(() => {
@@ -24,9 +27,48 @@ export default function Profile() {
             name: user.name || '',
             surname: user.surname || '',
             dni: user.dni || '',
-            tag: user.tag || '-'
+            tag: user.tag || '-',
+            tagLock: user.tagLock || '0'
         });
     }, [user]);
+
+    const handleLockToggle = async () => {
+        const isLocked = Number(formData.tagLock) === 1;
+
+        const result = await Swal.fire({
+            title: isLocked ? '¿Desbloquear Tarjeta?' : '¿Bloquear Tarjeta?',
+            text: isLocked
+                ? "Vas a desbloquear tu tarjeta. Podrás volver a utilizarla."
+                : "Si bloqueás tu tarjeta no podrá ser usada hasta que la habilites.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: isLocked ? 'Sí, desbloquear' : 'Sí, bloquear',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: isLocked ? '#22c55e' : '#ef4444'
+        });
+
+        if (result.isConfirmed) {
+            setLoadingLock(true);
+            const response = await toggleCardLock(user.email, !isLocked); // Toggle state
+
+            if (response.success) {
+                const newLockState = response.status === 'locked' ? '1' : '0';
+                await refreshBalance(); // Sync global state
+
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Listo!',
+                    text: newLockState === '1'
+                        ? "Ya bloqueamos tu tarjeta."
+                        : "Ya habilitamos tu tarjeta.",
+                    timer: 2000
+                });
+            } else {
+                Swal.fire('Error', response.message || 'Error al actualizar', 'error');
+            }
+            setLoadingLock(false);
+        }
+    };
 
     const handleSave = async () => {
         setLoading(true);
@@ -42,12 +84,56 @@ export default function Profile() {
     };
 
     const handleLinkCard = async (cardId) => {
-        // Logic for linking card (legacy accion=59)
-        if (cardId && cardId.length >= 6) {
-            alert("Funcionalidad de vinculación en proceso de implementación (Requiere endpoint legacy)");
-            setShowLinkModal(false);
-        } else {
-            alert("ID de tarjeta inválido (mínimo 6 caracteres)");
+        if (!cardId || cardId.length < 8) {
+            Swal.fire('Error', 'El ID de tarjeta debe tener 8 caracteres', 'warning');
+            return;
+        }
+
+        // Show loading state if desired, or just wait
+        Swal.showLoading();
+
+        try {
+            const response = await linkCard(user.email, cardId);
+
+            if (response.success) {
+                const saldoAnterior = parseFloat(user.credit) || 0;
+                const saldoTarjeta = response.cardBalance;
+                const saldoTotal = saldoAnterior + saldoTarjeta;
+
+                await refreshBalance(); // Sync app state
+                setShowLinkModal(false); // Close modal
+
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Tarjeta vinculada!',
+                    html: `
+                        <div style="text-align: left;">
+                            <p>Se vinculó correctamente la tarjeta a tu cuenta.</p>
+                            <br/>
+                            <div style="background: #f3f4f6; padding: 10px; border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span style="color: #6b7280;">Saldo anterior:</span>
+                                    <span style="font-weight: bold;">$ ${saldoAnterior}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span style="color: #6b7280;">Saldo en tarjeta:</span>
+                                    <span style="font-weight: bold; color: #10b981;">+ $ ${saldoTarjeta}</span>
+                                </div>
+                                <div style="border-top: 1px solid #d1d5db; margin: 5px 0;"></div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #111827; font-weight: bold;">Saldo actual:</span>
+                                    <span style="font-weight: bold; color: #0ea5e9;">$ ${saldoTotal}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                });
+            } else {
+                Swal.fire('Ups!', response.message || 'Error al vincular tarjeta', 'warning');
+            }
+        } catch (error) {
+            console.error(error);
+            Swal.fire('Error', 'Hubo un problema de conexión', 'error');
         }
     };
 
@@ -148,15 +234,31 @@ export default function Profile() {
                             <CreditCard className="h-5 w-5 text-gray-400" />
                         </h3>
 
-                        <div className="flex items-center justify-between p-4 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl text-white shadow-lg">
-                            <div>
-                                <p className="text-xs text-gray-400 uppercase mb-1">ID Tarjeta</p>
-                                <p className="font-mono font-bold text-xl tracking-widest">{formData.tag}</p>
+                        <div className="flex flex-col gap-4 p-4 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl text-white shadow-lg">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs text-gray-400 uppercase mb-1">ID Tarjeta</p>
+                                    <p className="font-mono font-bold text-xl tracking-widest">{formData.tag}</p>
+                                </div>
+                                {formData.tag !== '-' && (
+                                    <div className={`px-2 py-1 rounded-full text-xs font-bold border ${Number(formData.tagLock) === 1 ? 'bg-red-500/20 text-red-300 border-red-500/50' : 'bg-green-500/20 text-green-300 border-green-500/50'}`}>
+                                        {Number(formData.tagLock) === 1 ? 'BLOQUEADA' : 'ACTIVA'}
+                                    </div>
+                                )}
                             </div>
+
                             {formData.tag === '-' ? (
-                                <Button size="sm" variant="secondary" onClick={() => setShowLinkModal(true)} className="bg-white/20 text-white hover:bg-white/30 border-0">Vincular</Button>
+                                <Button size="sm" variant="secondary" onClick={() => setShowLinkModal(true)} className="bg-white/20 text-white hover:bg-white/30 border-0 w-full">Vincular</Button>
                             ) : (
-                                <Lock className="h-5 w-5 text-gray-400" />
+                                <Button
+                                    onClick={handleLockToggle}
+                                    disabled={loadingLock}
+                                    size="sm"
+                                    className={`w-full border-none ${Number(formData.tagLock) === 1 ? 'bg-blue-600 hover:bg-blue-700' : 'bg-red-600 hover:bg-red-700'}`}
+                                >
+                                    {loadingLock ? <Loader2 className="h-4 w-4 animate-spin" /> : (Number(formData.tagLock) === 1 ? <Unlock className="h-4 w-4 mr-2" /> : <Lock className="h-4 w-4 mr-2" />)}
+                                    {Number(formData.tagLock) === 1 ? 'Desbloquear Tarjeta' : 'Bloquear Tarjeta'}
+                                </Button>
                             )}
                         </div>
                     </div>
@@ -194,7 +296,7 @@ export default function Profile() {
                                     <CreditCard className="h-6 w-6" />
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900">Vincular Tarjeta</h3>
-                                <p className="text-gray-500 text-sm">Ingresá el ID de 8 caracteres que figura en tu tarjeta AquaExpress</p>
+                                <p className="text-gray-500 text-sm">Ingresá el código de 8 caracteres que te dieron al comprar tu tarjeta</p>
                             </div>
 
                             <form onSubmit={(e) => { e.preventDefault(); handleLinkCard(e.target.cardId.value); }} className="space-y-4">
