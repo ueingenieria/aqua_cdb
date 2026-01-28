@@ -38,7 +38,7 @@ export default function LocationsMap() {
     const [libraries] = useState(['places', 'geometry']);
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
-        googleMapsApiKey: 'AIzaSyA88F-102I-6vf11EDKFMvn_WKOjc2eIG4', // Legacy Key
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY, // Clave desde .env
         libraries
     });
 

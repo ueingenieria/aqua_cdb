@@ -2,13 +2,13 @@ import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBtEsOetVhqyZm8mCdAl25sslP3ySKqNO8",
-    authDomain: "aquapush-a8539.firebaseapp.com",
-    projectId: "aquapush-a8539",
-    storageBucket: "aquapush-a8539.firebasestorage.app",
-    messagingSenderId: "1079314091164",
-    appId: "1:1079314091164:web:e0ce32a3649e9973847159",
-    measurementId: "G-0537LXH9C5"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);
