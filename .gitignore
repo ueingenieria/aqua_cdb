@@ -17,6 +17,7 @@ dist-ssr
 !.vscode/extensions.json
 .idea
 .DS_Store
+desktop.ini
 *.suo
 *.ntvs*
 *.njsproj
@@ -28,7 +29,26 @@ dist-ssr
 .env.local
 .env.*.local
 
+# Credenciales PHP del servidor (nunca versionar)
+secrets.php
+legacy_backup/pages_ext/secrets.php
+
 # Build outputs
 dist
 dist-ssr
 build
+
+# Mobile artifacts and signing material
+dist-mobile/
+*.jks
+*.keystore
+*.p12
+*.p8
+*.mobileprovision
+*.ipa
+*.aab
+*.apk
+android/app/google-services.json
+google-services.json
+ios/App/App/GoogleService-Info.plist
+mobile-signing/

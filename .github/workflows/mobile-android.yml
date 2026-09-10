@@ -1,0 +1,104 @@
+name: Android - build de prueba o actualización
+on:
+  workflow_call:
+    inputs:
+      variant:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      build_number:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: Debug APK para pruebas o release AAB firmado
+        type: choice
+        options: [debug, release]
+        default: debug
+      version:
+        description: Versión visible (superior a la publicada)
+        required: true
+        default: '3.4.0'
+      build_number:
+        description: Version code superior a TODOS los usados en Play Console
+        required: true
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      APP_VERSION: ${{ inputs.version }}
+      APP_BUILD_NUMBER: ${{ inputs.build_number }}
+      VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
+      VITE_GOOGLE_WEB_CLIENT_ID: ${{ vars.VITE_GOOGLE_WEB_CLIENT_ID }}
+      GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Instalar y comprobar configuración
+        run: |
+          npm ci
+          node scripts/prepare-mobile-ci.mjs android
+          npm run test:mobile
+      - name: Preparar app
+        run: |
+          npm run build:mobile
+          npx cap sync android
+      - name: Preparar firma de actualización
+        if: inputs.variant == 'release'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { writeFileSync, appendFileSync } from 'node:fs';
+          import { join } from 'node:path';
+          for (const key of ['KEYSTORE_BASE64', 'ANDROID_KEYSTORE_PASSWORD', 'ANDROID_KEY_ALIAS', 'ANDROID_KEY_PASSWORD']) {
+            if (!process.env[key]) throw new Error(`Falta el secreto ${key}`);
+          }
+          const path = join(process.env.RUNNER_TEMP, 'aqua-upload.jks');
+          writeFileSync(path, Buffer.from(process.env.KEYSTORE_BASE64, 'base64'), { mode: 0o600 });
+          appendFileSync(process.env.GITHUB_ENV, `ANDROID_KEYSTORE_PATH=${path}\n`);
+          NODE
+      - name: Compilar APK de prueba
+        if: inputs.variant == 'debug'
+        working-directory: android
+        run: bash gradlew assembleDebug --no-daemon
+      - name: Compilar AAB firmado
+        if: inputs.variant == 'release'
+        working-directory: android
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: bash gradlew bundleRelease --no-daemon
+      - name: Verificar certificado del AAB
+        if: inputs.variant == 'release'
+        run: |
+          keytool -J-Duser.language=en -printcert -jarfile android/app/build/outputs/bundle/release/app-release.aab > "$RUNNER_TEMP/aab-certificate.txt"
+          grep -F 'F8:27:58:E4:18:35:62:68:76:FD:63:2C:47:44:28:B4:4B:42:B4:7A:BA:A7:E0:8B:F4:C3:97:82:2E:1F:66:BD' "$RUNNER_TEMP/aab-certificate.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aqua-android-${{ inputs.variant }}-${{ inputs.build_number }}
+          path: |
+            android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+          retention-days: 7
+      - name: Limpiar firma
+        if: always()
+        run: rm -f "$RUNNER_TEMP/aqua-upload.jks"

@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { GoogleOAuthProvider } from '@react-oauth/google';
+
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -14,8 +14,16 @@ import CreditsMap from './pages/CreditsMap';
 import Activity from './pages/Activity';
 import News from './pages/News';
 import Benefits from './pages/Benefits';
+import Redeem from './pages/Redeem';
+import MyQR from './pages/MyQR';
+import Referidos from './pages/Referidos';
 import MainLayout from './components/layout/MainLayout';
 import { Loader2 } from 'lucide-react';
+import { SplashScreen } from './components/ui/SplashScreen';
+import { useState } from 'react';
+import MobileLifecycle from './mobile/MobileLifecycle';
+import { isNative } from './mobile/platform';
+import { onNativeMessage } from './mobile/push';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -33,7 +41,21 @@ const PrivateRoute = ({ children }) => {
 };
 
 const App = () => {
+  const [showSplash, setShowSplash] = useState(true);
+
   useEffect(() => {
+    if (isNative()) {
+      let disposed = false;
+      let listener;
+      onNativeMessage(async ({ notification }) => {
+        const Swal = (await import('sweetalert2')).default;
+        if (!disposed) Swal.fire({ title: notification.title || 'AquaExpress', text: notification.body || '', toast: true, position: 'top-end', timer: 5000, showConfirmButton: false });
+      }).then(handle => {
+        if (disposed) void handle.remove();
+        else listener = handle;
+      }).catch(console.error);
+      return () => { disposed = true; void listener?.remove(); };
+    }
     // Listen for foreground push messages
     const listenForMessages = async () => {
       try {
@@ -60,9 +82,11 @@ const App = () => {
   }, []);
 
   return (
-    <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
-      <BrowserRouter basename="/cdb">
+    <>
+      {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <AuthProvider>
+          <MobileLifecycle />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -76,12 +100,15 @@ const App = () => {
               <Route path="cupones" element={<Coupons />} />
               <Route path="billetera" element={<Wallet />} />
               <Route path="qr" element={<QRScanner />} />
+              <Route path="qr-usuario" element={<MyQR />} />
               <Route path="perfil" element={<Profile />} />
               <Route path="mapa" element={<LocationsMap />} />
               <Route path="creditos-mapa" element={<CreditsMap />} />
               <Route path="actividad" element={<Activity />} />
               <Route path="novedades" element={<News />} />
               <Route path="beneficios" element={<Benefits />} />
+              <Route path="canje" element={<Redeem />} />
+              <Route path="referidos" element={<Referidos />} />
             </Route>
 
             {/* Fallback route */}
@@ -89,8 +116,8 @@ const App = () => {
           </Routes>
         </AuthProvider>
       </BrowserRouter>
-    </GoogleOAuthProvider>
-  )
-}
+    </>
+  );
+};
 
 export default App;

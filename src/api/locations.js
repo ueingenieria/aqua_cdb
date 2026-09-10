@@ -2,7 +2,7 @@ import client from './client';
 
 export const getLavaderos = async () => {
     try {
-        const response = await client.get('http://turnos.aquaexpress.com.ar/aquaxp/vial/aquaapp/list_lavaderos/');
+        const response = await client.get('https://turnos.aquaexpress.com.ar/aquaxp/vial/aquaapp/list_lavaderos/');
         // Legacy filter: l.direccion != 'OCULTO'
         if (response.data && response.data.items) {
             return response.data.items.filter(l => l.direccion !== 'OCULTO');
@@ -18,12 +18,18 @@ export const calculateDistance = (posActual, posLavadero) => {
     const R = 6371; // Radio de la Tierra en Km
     const degToRad = (deg) => deg * (Math.PI / 180);
 
-    const deltaLat = degToRad(posLavadero.lat - posActual.lat);
-    const deltaLon = degToRad(posLavadero.lon - posActual.lon);
+    const lat1 = posActual.lat;
+    const lon1 = posActual.lng || posActual.lon;
+    const lat2 = posLavadero.lat || posLavadero.latitud;
+    const lon2 = posLavadero.lng || posLavadero.lon || posLavadero.longitud;
 
-    const a = Math.pow(Math.sin(deltaLat / 2), 2);
-    const b = (Math.cos(degToRad(posActual.lat)) * Math.cos(degToRad(posLavadero.lat)) * Math.pow((deltaLon / 2), 2));
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - (a + b)));
+    const deltaLat = degToRad(lat2 - lat1);
+    const deltaLon = degToRad(lon2 - lon1);
+
+    const a = Math.pow(Math.sin(deltaLat / 2), 2) +
+        Math.cos(degToRad(lat1)) * Math.cos(degToRad(lat2)) *
+        Math.pow(Math.sin(deltaLon / 2), 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const res = R * c;
 
     return res;

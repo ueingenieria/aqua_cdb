@@ -3,7 +3,7 @@ import { Home, Ticket, User, QrCode, Wallet } from 'lucide-react';
 import { clsx } from 'clsx';
 import InstallPWA from '../ui/InstallPWA';
 
-import globalBg from '../../assets/fondo2.png';
+import globalBg from '../../assets/fondo.png';
 
 export default function MainLayout() {
     return (
@@ -14,8 +14,9 @@ export default function MainLayout() {
                 <img
                     src={globalBg}
                     alt="App Background"
-                    className="w-full h-full object-cover opacity-100" // Adjust opacity if needed, user implies 'this background' so likely 100%
+                    className="w-full h-full object-cover opacity-100"
                 />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-sky-200/90" />
             </div>
 
             {/* Sidebar Desktop */}
@@ -35,7 +36,7 @@ export default function MainLayout() {
                 </div>
             </nav>
 
-            <main className="min-h-screen relative z-10">
+            <main className="min-h-screen relative">
                 <Outlet />
             </main>
 
@@ -49,8 +50,8 @@ function NavItmes({ mobile }) {
         { to: "/", icon: Home, label: "Inicio" },
         { to: "/cupones", icon: Ticket, label: "Cupones" },
         { to: "/qr", icon: QrCode, label: "QR", highlight: true },
+        { to: "/billetera", icon: Wallet, label: "Billetera" },
         { to: "/perfil", icon: User, label: "Perfil" },
-        { to: "/billetera", icon: Wallet, label: "Billetera" }, // Added Wallet back
     ];
 
     return items.map((item) => (

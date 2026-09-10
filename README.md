@@ -1,5 +1,7 @@
 # React + Vite
 
+Publicación móvil: ver [guía de Android, iOS y TestFlight desde Windows](docs/publicacion-tiendas.md).
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

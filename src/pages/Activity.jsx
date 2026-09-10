@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, ArrowUpRight, ArrowDownLeft, Ticket, Calendar, Search, Smartphone, CreditCard } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, ArrowDownLeft, Ticket, Calendar, Search, Smartphone, CreditCard, Award, Droplets, Share2, RotateCcw, Layers, ShoppingBag } from 'lucide-react';
 import { getUserActivity } from '../api/activity';
 
 export default function Activity() {
@@ -30,6 +30,8 @@ export default function Activity() {
         fetchActivity();
     }, [user]);
 
+    const isLavadoItem = (item) => item.type?.startsWith('lavado_');
+
     const filteredActivity = activity.filter(item => {
         if (filter === 'todos') return true;
         if (filter === 'ingresos') return item.amount > 0;
@@ -38,12 +40,32 @@ export default function Activity() {
     });
 
     const getIcon = (item) => {
+        if (isLavadoItem(item)) {
+            const tipo = item.type.replace('lavado_', '');
+            if (tipo === 'uso') {
+                if (item.method === 'QR/BENEF' || item.method === 'QR/CLUB')
+                    return <Award className="h-6 w-6 text-amber-500" />;
+                return <Droplets className="h-6 w-6 text-sky-600" />;
+            }
+            if (tipo === 'referido') return <Share2 className="h-6 w-6 text-emerald-600" />;
+            if (tipo === 'arrastre') return <Layers className="h-6 w-6 text-violet-600" />;
+            if (tipo === 'bonus') return <Award className="h-6 w-6 text-amber-500" />;
+            return <RotateCcw className="h-6 w-6 text-teal-600" />; // renovacion y otros
+        }
+        if (item.type === 'compra_producto') return <ShoppingBag className="h-6 w-6 text-violet-600" />;
+        if (item.method === 'QR/BENEF') return <Award className="h-6 w-6 text-yellow-600" />;
         if (item.method === 'QR') return <Smartphone className="h-6 w-6 text-blue-600" />;
         if (item.method === 'RFID') return <CreditCard className="h-6 w-6 text-orange-600" />;
         return <ArrowUpRight className="h-6 w-6 text-red-600" />;
     };
 
     const getColorClass = (item) => {
+        if (isLavadoItem(item)) {
+            if (item.method === 'QR/BENEF' || item.method === 'QR/CLUB')
+                return 'bg-amber-50 border-amber-100';
+            if (item.amount < 0) return 'bg-sky-50 border-sky-100';
+            return 'bg-teal-50 border-teal-100';
+        }
         if (item.amount > 0) return 'bg-green-50 border-green-100';
         return 'bg-gray-50 border-gray-200';
     };
@@ -51,6 +73,37 @@ export default function Activity() {
     const getAmountColor = (amount) => {
         if (amount > 0) return 'text-green-600';
         return 'text-red-600';
+    };
+
+    const formatAmount = (item) => {
+        if (isLavadoItem(item)) {
+            const n = Math.abs(item.amount);
+            const unit = `lavado${n !== 1 ? 's' : ''}`;
+            return item.amount > 0 ? `+${n} ${unit}` : `-${n} ${unit}`;
+        }
+        return `${item.amount > 0 ? '+' : '-'}$${Math.abs(item.amount)}`;
+    };
+
+    const formatAmountColor = (item) => {
+        if (isLavadoItem(item)) {
+            return item.amount >= 0 ? 'text-teal-600' : 'text-sky-600';
+        }
+        return getAmountColor(item.amount);
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        // Intentar parsear fecha estándar SQL o ISO
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return dateString;
+
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+
+        return `${day}-${month}-${year} ${hours}:${minutes}`;
     };
 
     return (
@@ -102,16 +155,16 @@ export default function Activity() {
                             <div className="flex-1 min-w-0">
                                 <div className="flex justify-between items-start">
                                     <h3 className="font-bold text-gray-900 truncate">{item.title}</h3>
-                                    <span className={`font-bold ${getAmountColor(item.amount)}`}>
-                                        {item.amount > 0 ? '+' : ''}{item.amount}
+                                    <span className={`font-bold text-sm ${formatAmountColor(item)}`}>
+                                        {formatAmount(item)}
                                     </span>
                                 </div>
                                 <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                                    {item.date} • {item.method}
+                                    {formatDate(item.date)} • {item.method}
                                 </p>
                                 {(item.detail) && (
                                     <p className="text-xs text-gray-400 mt-0.5 truncate uppercase">
-                                        {item.detail}
+                                        {item.detail.replace(/(\d+(?:\.\d+)?)%/g, '$$$1')}
                                     </p>
                                 )}
                             </div>

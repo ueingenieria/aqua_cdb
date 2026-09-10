@@ -1,0 +1,126 @@
+name: iOS - compilación en Mac de la nube
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: Validar simulador o generar IPA para TestFlight
+        type: choice
+        options: [simulator, signed]
+        default: simulator
+      version:
+        description: Versión visible (superior a la publicada)
+        required: true
+        default: '3.4.0'
+      build_number:
+        description: Número de build no utilizado en App Store Connect
+        required: true
+      upload_testflight:
+        description: Subir el IPA firmado a App Store Connect para pruebas (no publica en la tienda)
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      APP_VERSION: ${{ inputs.version }}
+      APP_BUILD_NUMBER: ${{ inputs.build_number }}
+      IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID }}
+      VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
+      VITE_GOOGLE_WEB_CLIENT_ID: ${{ vars.VITE_GOOGLE_WEB_CLIENT_ID }}
+      VITE_GOOGLE_IOS_CLIENT_ID: ${{ vars.VITE_GOOGLE_IOS_CLIENT_ID }}
+      GOOGLE_SERVICE_INFO_PLIST_BASE64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_BASE64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Verificar Xcode y preparar configuración
+        env:
+          UPLOAD_TESTFLIGHT: ${{ inputs.upload_testflight }}
+          BUILD_VARIANT: ${{ inputs.variant }}
+        run: |
+          if [ "$UPLOAD_TESTFLIGHT" = true ] && [ "$BUILD_VARIANT" != signed ]; then
+            echo 'Para TestFlight seleccioná la variante signed.' >&2
+            exit 1
+          fi
+          xcodebuild -version
+          major=$(xcodebuild -version | awk '/Xcode/ {split($2,v,"."); print v[1]}')
+          test "$major" -ge 26
+          npm ci
+          node scripts/prepare-mobile-ci.mjs ios
+          node scripts/configure-ios.mjs
+          npm run test:mobile
+      - name: Compilar recursos y resolver dependencias Swift
+        run: |
+          npm run build:mobile
+          npx cap sync ios
+          xcodebuild -resolvePackageDependencies -project ios/App/App.xcodeproj -scheme App
+      - name: Compilar para simulador (no instalable en iPhone)
+        if: inputs.variant == 'simulator'
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/ios-simulator CODE_SIGNING_ALLOWED=NO \
+            MARKETING_VERSION="$APP_VERSION" CURRENT_PROJECT_VERSION="$APP_BUILD_NUMBER" build
+          ditto -c -k --keepParent build/ios-simulator/Build/Products/Debug-iphonesimulator/App.app build/AquaExpress-simulator.zip
+      - name: Instalar certificado y perfil de App Store
+        if: inputs.variant == 'signed'
+        env:
+          IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          IOS_PROFILE_BASE64: ${{ secrets.IOS_PROFILE_BASE64 }}
+          IOS_TEAM_ID: ${{ vars.IOS_TEAM_ID }}
+        run: bash scripts/ios-signing.sh
+      - name: Archivar y exportar IPA firmado
+        if: inputs.variant == 'signed'
+        env:
+          IOS_TEAM_ID: ${{ vars.IOS_TEAM_ID }}
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath build/AquaExpress.xcarchive \
+            DEVELOPMENT_TEAM="$IOS_TEAM_ID" CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY='Apple Distribution' PROVISIONING_PROFILE_SPECIFIER="$IOS_PROFILE_UUID" \
+            MARKETING_VERSION="$APP_VERSION" CURRENT_PROJECT_VERSION="$APP_BUILD_NUMBER" archive
+          xcodebuild -exportArchive -archivePath build/AquaExpress.xcarchive \
+            -exportPath build/ios-export -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aqua-ios-${{ inputs.variant }}-${{ inputs.build_number }}
+          path: |
+            build/AquaExpress-simulator.zip
+            build/ios-export/*.ipa
+          if-no-files-found: error
+          retention-days: 7
+      - name: Subir a App Store Connect para TestFlight
+        if: inputs.variant == 'signed' && inputs.upload_testflight
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ vars.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ vars.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_KEY_BASE64 }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { mkdirSync, writeFileSync } from 'node:fs';
+          const { APP_STORE_CONNECT_KEY_ID: id, APP_STORE_CONNECT_ISSUER_ID: issuer, APP_STORE_CONNECT_KEY_BASE64: key } = process.env;
+          if (!/^[A-Z0-9]+$/.test(id || '') || !issuer || !key) throw new Error('Falta la clave API de App Store Connect.');
+          mkdirSync('private_keys', { recursive: true });
+          writeFileSync(`private_keys/AuthKey_${id}.p8`, Buffer.from(key, 'base64'), { mode: 0o600 });
+          NODE
+          files=(build/ios-export/*.ipa)
+          test "${#files[@]}" -eq 1
+          xcrun altool --upload-app --type ios --file "${files[0]}" \
+            --apiKey "$APP_STORE_CONNECT_KEY_ID" --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
+      - name: Limpiar firma
+        if: always() && inputs.variant == 'signed'
+        run: |
+          if [ -f "$RUNNER_TEMP/aqua-signing.keychain-db" ]; then
+            security delete-keychain "$RUNNER_TEMP/aqua-signing.keychain-db"
+          fi
+          rm -f "$RUNNER_TEMP/aqua-distribution.p12" "$RUNNER_TEMP/profile.plist" "$RUNNER_TEMP/aqua.mobileprovision"
+          rm -f private_keys/*.p8
+          if [ -n "${IOS_PROFILE_UUID:-}" ]; then
+            rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/$IOS_PROFILE_UUID.mobileprovision"
+          fi

@@ -3,7 +3,7 @@ import client from './client';
 export const modifyUser = async (email, name, surname, dni) => {
     // Legacy: modify_user/
     try {
-        const response = await client.put('http://turnos.aquaexpress.com.ar/aquaxp/vial/aquaapp/modify_user/', null, {
+        const response = await client.put('https://turnos.aquaexpress.com.ar/aquaxp/vial/aquaapp/modify_user/', null, {
             headers: {
                 'p_nombre': name,
                 'p_apellido': surname,
@@ -19,24 +19,24 @@ export const modifyUser = async (email, name, surname, dni) => {
 };
 
 export const deleteUser = async (email, password) => {
-    try {
-        const response = await client.post('http://turnos.aquaexpress.com.ar/aquaxp/vial/aquaapp/delete_user/', null, {
-            headers: {
-                'Content-type': 'application/x-www-form-urlencoded',
-                'p_login': email,
-                'p_password': password
-            }
-        });
-        return response.data;
-    } catch (error) {
-        throw error;
+    const response = await client.post('https://turnos.aquaexpress.com.ar/aquaxp/vial/aquaapp/delete_user/', null, {
+        headers: {
+            'Content-type': 'application/x-www-form-urlencoded',
+            'p_login': email,
+            'p_password': password
+        }
+    });
+    const pCode = response.data?.p_code ?? response.headers['p_code'];
+    if (pCode !== undefined && Number(pCode) < 0) {
+        throw new Error(response.data?.p_msg || 'Error al eliminar la cuenta.');
     }
+    return response.data;
 };
 
 export const registerUser = async (name, surname, email, password) => {
     // Legacy: registeruser/
     try {
-        const response = await client.post('http://turnos.aquaexpress.com.ar/aquaxp/vial/aquaapp/registeruser/', null, {
+        const response = await client.post('https://turnos.aquaexpress.com.ar/aquaxp/vial/aquaapp/registeruser/', null, {
             headers: {
                 'Content-type': 'application/x-www-form-urlencoded',
                 'p_nombre': name,

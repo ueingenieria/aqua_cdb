@@ -3,7 +3,7 @@ import client from './client';
 export const getCoupons = async (email) => {
     // Legacy: cupones/ GET
     try {
-        const response = await client.get('http://turnos.aquaexpress.com.ar/aquaxp/vial/aquaapp/cupones/', {
+        const response = await client.get('https://turnos.aquaexpress.com.ar/aquaxp/vial/aquaapp/cupones/', {
             headers: { 'p_login': email }
         });
         console.log("getCoupons Response:", response.data);
@@ -18,7 +18,7 @@ export const validateCouponCode = async (code) => {
     // Legacy: productos_ocultos/ GET
     // Devuelve todos los productos ocultos, luego filtramos en el cliente por código en 'nota'
     try {
-        const response = await client.get('http://turnos.aquaexpress.com.ar/aquaxp/vial/aquaapp/productos_ocultos/');
+        const response = await client.get('https://turnos.aquaexpress.com.ar/aquaxp/vial/aquaapp/productos_ocultos/');
         const items = response.data.items || [];
 
         // Legacy Logic:
@@ -43,7 +43,7 @@ export const validateCouponCode = async (code) => {
 export const redeemCoupon = async (email, productId) => {
     // Legacy: puntos/ PUT
     try {
-        const response = await client.put('http://turnos.aquaexpress.com.ar/aquaxp/vial/aquaapp/puntos/', null, {
+        const response = await client.put('https://turnos.aquaexpress.com.ar/aquaxp/vial/aquaapp/puntos/', null, {
             headers: {
                 'Content-Type': 'text/plain', // Legacy usaba text/plain
                 'p_login': email,

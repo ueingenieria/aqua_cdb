@@ -1,0 +1,14 @@
+name: Android - candidato para prueba interna
+on:
+  push:
+    branches: [codex/mobile-stores]
+permissions:
+  contents: read
+jobs:
+  candidate:
+    uses: ./.github/workflows/mobile-android.yml
+    with:
+      variant: release
+      version: '3.4.0'
+      build_number: '30400'
+    secrets: inherit

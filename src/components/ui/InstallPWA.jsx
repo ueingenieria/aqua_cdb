@@ -1,17 +1,35 @@
 import { useState, useEffect } from 'react';
 import { Download, X } from 'lucide-react';
+import { isNative } from '../../mobile/platform';
 
 export default function InstallPWA() {
     const [supportsPWA, setSupportsPWA] = useState(false);
     const [promptInstall, setPromptInstall] = useState(null);
     const [isInstalled, setIsInstalled] = useState(false);
+    const [isManualSupport, setIsManualSupport] = useState(false);
 
     useEffect(() => {
+        if (isNative()) return;
         const handler = (e) => {
             e.preventDefault();
             setSupportsPWA(true);
             setPromptInstall(e);
         };
+
+        // Detect Firefox or iOS for manual guide
+        const ua = navigator.userAgent.toLowerCase();
+        const isFirefox = ua.includes('firefox');
+        const isIOS = /ipad|iphone|ipod/.test(ua) && !window.MSStream;
+
+        if (isFirefox || isIOS) {
+            setIsManualSupport(true);
+        }
+
+        // Check if event was already fired and stored globally
+        if (window.deferredPrompt) {
+            setSupportsPWA(true);
+            setPromptInstall(window.deferredPrompt);
+        }
 
         // Check if launched in standalone (already installed)
         if (window.matchMedia('(display-mode: standalone)').matches) {
@@ -26,18 +44,32 @@ export default function InstallPWA() {
 
     const onClick = (evt) => {
         evt.preventDefault();
-        if (!promptInstall) {
-            return;
+        if (promptInstall) {
+            promptInstall.prompt();
+            promptInstall.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    setSupportsPWA(false);
+                }
+            });
+        } else if (isManualSupport) {
+            const isIOS = /ipad|iphone|ipod/.test(navigator.userAgent.toLowerCase()) && !window.MSStream;
+            const message = isIOS
+                ? 'Para instalar en iOS: Toca el icono de "Compartir" (el cuadrado con flecha) y selecciona "Agregar a inicio".'
+                : 'Para instalar en Firefox: Toca los tres puntos (menú) y selecciona "Instalar" o "Agregar a la pantalla de inicio".';
+
+            import('sweetalert2').then(Swal => {
+                Swal.default.fire({
+                    title: 'Instalación Manual',
+                    text: message,
+                    icon: 'info',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#0ea5e9'
+                });
+            });
         }
-        promptInstall.prompt();
-        promptInstall.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-                setSupportsPWA(false);
-            }
-        });
     };
 
-    if (!supportsPWA || isInstalled) {
+    if (isNative() || isInstalled || (!supportsPWA && !isManualSupport)) {
         return null;
     }
 
@@ -59,7 +91,13 @@ export default function InstallPWA() {
                 >
                     Instalar
                 </button>
-                <button onClick={() => setSupportsPWA(false)} className="absolute -top-2 -right-2 bg-gray-500 rounded-full p-1 text-white shadow-sm">
+                <button
+                    onClick={() => {
+                        setSupportsPWA(false);
+                        setIsManualSupport(false);
+                    }}
+                    className="absolute -top-2 -right-2 bg-gray-500 rounded-full p-1 text-white shadow-sm"
+                >
                     <X className="h-3 w-3" />
                 </button>
             </div>

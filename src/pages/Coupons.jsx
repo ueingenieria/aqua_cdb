@@ -7,7 +7,7 @@ import { Input } from '../components/ui/Input';
 import { Loader2, TicketX, Plus, X, Copy } from 'lucide-react';
 import { Tab } from '@headlessui/react';
 import { clsx } from 'clsx';
-import ClubSubscription from '../components/club/ClubSubscription';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function Coupons() {
     const { user } = useAuth();
@@ -121,8 +121,6 @@ export default function Coupons() {
                 </div>
             </header>
 
-            <ClubSubscription hideIfSubscribed />
-
             <Tab.Group>
                 <Tab.List className="flex space-x-1 rounded-xl bg-gray-200/50 p-1">
                     {['Disponibles', 'Usados'].map((category) => (
@@ -230,8 +228,11 @@ export default function Coupons() {
 
             {/* Modal Detail Coupon */}
             {selectedCoupon && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-in fade-in zoom-in duration-200 backdrop-blur-sm">
-                    <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl relative">
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-in fade-in zoom-in duration-200 backdrop-blur-sm"
+                    onClick={() => setSelectedCoupon(null)}
+                >
+                    <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl relative" onClick={e => e.stopPropagation()}>
                         <button
                             onClick={() => setSelectedCoupon(null)}
                             className="absolute top-4 right-4 bg-gray-100 rounded-full p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 transition-colors"
@@ -239,11 +240,7 @@ export default function Coupons() {
                             <X className="h-5 w-5" />
                         </button>
 
-                        <div className="p-8 flex flex-col items-center text-center space-y-6">
-                            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-2">
-                                <TicketX className="h-10 w-10" />
-                            </div>
-
+                        <div className="p-6 flex flex-col items-center text-center space-y-5">
                             <div>
                                 <h3 className="text-2xl font-bold text-gray-900 leading-tight">
                                     {selectedCoupon.titulo_cupon || 'Cupón'}
@@ -251,18 +248,43 @@ export default function Coupons() {
                                 <p className="text-gray-500 mt-2 text-sm">{selectedCoupon.nota || selectedCoupon.observaciones}</p>
                             </div>
 
-                            <div className="w-full space-y-2">
-                                <p className="text-xs uppercase font-bold text-gray-400 tracking-wider">Código de Canje</p>
-                                <div className="bg-gray-100 p-4 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center gap-3 group relative cursor-pointer active:scale-95 transition-transform"
-                                    onClick={() => { navigator.clipboard.writeText(selectedCoupon.codigo_de_cambio); alert("Copiado!") }}
-                                >
-                                    <span className="text-2xl font-mono font-bold text-gray-800 tracking-widest">
-                                        {selectedCoupon.codigo_de_cambio || '----'}
-                                    </span>
-                                    <Copy className="h-4 w-4 text-gray-400 absolute right-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            {selectedCoupon.codigo_de_cambio && selectedCoupon.usado === "NO" && (
+                                <div className="flex flex-col items-center space-y-3">
+                                    <div className="bg-white p-3 rounded-2xl border-2 border-gray-200 shadow-inner">
+                                        <QRCodeSVG
+                                            value={selectedCoupon.codigo_de_cambio}
+                                            size={180}
+                                            level="M"
+                                            includeMargin={false}
+                                        />
+                                    </div>
+                                    <div className="w-full space-y-1">
+                                        <p className="text-xs uppercase font-bold text-gray-400 tracking-wider">Código de Canje</p>
+                                        <div
+                                            className="bg-gray-100 p-3 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center gap-3 group relative cursor-pointer active:scale-95 transition-transform"
+                                            onClick={() => { navigator.clipboard.writeText(selectedCoupon.codigo_de_cambio); alert("Copiado!"); }}
+                                        >
+                                            <span className="text-2xl font-mono font-bold text-gray-800 tracking-widest">
+                                                {selectedCoupon.codigo_de_cambio}
+                                            </span>
+                                            <Copy className="h-4 w-4 text-gray-400 absolute right-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        </div>
+                                        <p className="text-xs text-gray-400">Mostrá el QR o el código en la sucursal</p>
+                                    </div>
                                 </div>
-                                <p className="text-xs text-gray-400">Presentá este código en la sucursal</p>
-                            </div>
+                            )}
+
+                            {(!selectedCoupon.codigo_de_cambio || selectedCoupon.usado === "SI") && (
+                                <div className="w-full space-y-2">
+                                    <p className="text-xs uppercase font-bold text-gray-400 tracking-wider">Código de Canje</p>
+                                    <div className="bg-gray-100 p-4 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center">
+                                        <span className="text-2xl font-mono font-bold text-gray-400 tracking-widest">
+                                            {selectedCoupon.codigo_de_cambio || '----'}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-gray-400">Presentá este código en la sucursal</p>
+                                </div>
+                            )}
 
                             {selectedCoupon.valido_en && (
                                 <div className="bg-yellow-50 text-yellow-800 text-xs py-2 px-4 rounded-lg font-medium w-full">
