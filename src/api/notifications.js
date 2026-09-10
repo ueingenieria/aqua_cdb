@@ -1,19 +1,16 @@
 import axios from 'axios';
 import { requestForToken } from '../firebase';
 import { platform } from '../mobile/platform';
+import { legacyUserId, pushRegistrationParams } from './user-id.mjs';
 
 export const savePushToken = async (userId = null, requestPermission = false) => {
     try {
+        if (!legacyUserId({ p_id_cliente: userId })) return false;
         const token = await requestForToken(requestPermission);
         if (!token) return false;
 
-        const params = new URLSearchParams();
-        params.append('accion', '82'); // Cambiado de 80 a 82 para evitar conflicto con precios
-        params.append('token', token);
-        if (userId) {
-            params.append('id_cliente', userId);
-        }
-        params.append('platform', platform());
+        const params = pushRegistrationParams(token, userId, platform());
+        if (!params) return false;
 
         // Usamos axios con URLSearchParams para que PHP lo reciba correctamente en $_POST
         const response = await axios.post('https://www.aquaexpress.com.ar/aqua4d/aqua_4d.php', params, {

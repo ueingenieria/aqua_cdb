@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { loginUser } from '../api/auth';
+import { legacyUserId } from '../api/user-id.mjs';
 
 const AuthContext = createContext();
 
@@ -47,7 +48,7 @@ export const AuthProvider = ({ children }) => {
 
         if (data.p_msg && data.p_msg.includes("Acceso correcto")) {
             const userData = {
-                id: data.p_id_cliente,
+                id: legacyUserId(data),
                 email: email,
                 name: data.nombre || data.p_nombre || '',
                 surname: data.apellido || data.p_apellido || '',
@@ -63,10 +64,10 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('pass', password);
 
             import('../api/notifications').then(({ savePushToken }) => {
-                void savePushToken(data.p_id_cliente).catch(console.error);
+                void savePushToken(userData.id).catch(console.error);
             });
 
-            refreshSubscriptionStatus(data.p_id_cliente, email);
+            refreshSubscriptionStatus(userData.id, email);
 
             return { success: true, data };
         } else {
@@ -78,7 +79,7 @@ export const AuthProvider = ({ children }) => {
         if (userDataPayload) {
             // Flujo Bridge: Ya tenemos los datos del usuario legacy
             const userData = {
-                id: userDataPayload.p_id_cliente,
+                id: legacyUserId(userDataPayload),
                 email: emailPayload,
                 name: userDataPayload.nombre,
                 surname: userDataPayload.apellido,
