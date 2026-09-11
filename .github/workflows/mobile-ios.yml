@@ -1,5 +1,19 @@
 name: iOS - compilación en Mac de la nube
 on:
+  workflow_call:
+    inputs:
+      variant:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      build_number:
+        type: string
+        required: true
+      upload_testflight:
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       variant:

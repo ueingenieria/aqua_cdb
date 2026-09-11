@@ -54,15 +54,17 @@ test('CI refuses missing config and another Android app, then writes valid Fireb
 test('iOS configuration rejects an unrelated app and installs the matching Google callback', t => {
     const cwd = fixture(t);
     mkdirSync(join(cwd, 'ios/App/App'), { recursive: true });
+    mkdirSync(join(cwd, 'ios/App/App.xcodeproj'), { recursive: true });
+    writeFileSync(join(cwd, 'ios/App/App.xcodeproj/project.pbxproj'), 'PRODUCT_BUNDLE_IDENTIFIER = com.aquaexpress.aquaexpressCDB;');
     writeFileSync(join(cwd, 'capacitor.config.json'), JSON.stringify({ appId: 'com.aquaexpress.cdb' }));
     const infoPath = join(cwd, 'ios/App/App/Info.plist');
     writeFileSync(infoPath, plist.build({ CFBundleDisplayName: 'AquaExpress' }));
     writeFileSync(join(cwd, 'ios/App/App/GoogleService-Info.plist'), plist.build({
-        BUNDLE_ID: 'com.aquaexpress.cdb', CLIENT_ID: '123.apps.googleusercontent.com', REVERSED_CLIENT_ID: 'com.googleusercontent.apps.123',
+        BUNDLE_ID: 'com.aquaexpress.aquaexpressCDB', CLIENT_ID: '123.apps.googleusercontent.com', REVERSED_CLIENT_ID: 'com.googleusercontent.apps.123',
     }));
     const env = { IOS_BUNDLE_ID: 'com.other.app', VITE_GOOGLE_IOS_CLIENT_ID: '123.apps.googleusercontent.com' };
     assert.notEqual(run('configure-ios.mjs', cwd, [], env).status, 0);
-    env.IOS_BUNDLE_ID = 'com.aquaexpress.cdb';
+    env.IOS_BUNDLE_ID = 'com.aquaexpress.aquaexpressCDB';
     assert.equal(run('configure-ios.mjs', cwd, [], env).status, 0);
     const info = plist.parse(readFileSync(infoPath, 'utf8'));
     assert.equal(info.CFBundleDisplayName, 'AquaExpress');

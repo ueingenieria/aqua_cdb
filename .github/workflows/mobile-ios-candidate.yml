@@ -1,21 +1,21 @@
-name: Android - candidato para prueba interna
+name: iOS - candidato para TestFlight
 on:
   push:
     branches: [codex/mobile-stores]
-    paths-ignore:
+    paths:
       - 'ios/**'
       - 'scripts/configure-ios.mjs'
       - 'scripts/ios-signing.sh'
-      - 'tests/mobile-build.test.mjs'
       - '.github/workflows/mobile-ios*.yml'
-      - 'docs/**'
 permissions:
   contents: read
 jobs:
   candidate:
-    uses: ./.github/workflows/mobile-android.yml
+    uses: ./.github/workflows/mobile-ios.yml
     with:
-      variant: release
+      variant: signed
       version: '3.4.0'
-      build_number: '30401'
+      build_number: '1'
+      upload_testflight: true
     secrets: inherit
+
