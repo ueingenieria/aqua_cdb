@@ -326,7 +326,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
+                CODE_SIGN_IDENTITY = "Apple Distribution";
+                DEVELOPMENT_TEAM = "$(AQUA_TEAM_ID)";
+                PROVISIONING_PROFILE_SPECIFIER = "$(AQUA_PROFILE_UUID)";
                 CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = App/Info.plist;
